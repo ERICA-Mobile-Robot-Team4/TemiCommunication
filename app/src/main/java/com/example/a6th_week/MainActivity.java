@@ -77,13 +77,13 @@ public class MainActivity extends AppCompatActivity implements
         Class exampleContext = null;
         int id = view.getId();
         if (id == R.id.button1) {
-            exampleContext = MainActivity1.class;
+            exampleContext = Mission1.class;
         } else if (id == R.id.button2) {
             exampleContext = MainActivity2.class;
         } else if (id == R.id.button3) {
             exampleContext = MainActivity3.class;
         }else if (id == R.id.button4) {
-            exampleContext = MainActivity4.class;
+            exampleContext = Mission5.class;
         }
         Intent intent = new Intent(getApplicationContext(),exampleContext);
         startActivity(intent);

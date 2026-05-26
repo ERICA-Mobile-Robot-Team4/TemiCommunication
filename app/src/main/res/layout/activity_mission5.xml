@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="#F9F9F9">
+
+    <TextView
+        android:id="@+id/txtHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="집사의 방을 수색하세요."
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:gravity="center"
+        android:layout_marginBottom="40dp"/>
+
+    <LinearLayout
+        android:id="@+id/layoutHintOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="❌ 인증 실패. 힌트를 받으시겠습니까?"
+            android:textSize="24sp"
+            android:textColor="#FF3B30"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/btnHint1"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="① -5점  : 어려운 힌트"
+            android:textSize="20sp"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnHint2"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="② -10점 : 보통 힌트"
+            android:textSize="20sp"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnHint3"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="③ -15점 : 쉬운 힌트"
+            android:textSize="20sp"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnHint4"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="④ 힌트 없이 재시도"
+            android:textSize="20sp"/>
+    </LinearLayout>
+
+</LinearLayout>

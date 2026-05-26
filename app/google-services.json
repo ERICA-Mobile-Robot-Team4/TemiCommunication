@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "894380995953",
+    "firebase_url": "https://temi-team4-default-rtdb.firebaseio.com",
+    "project_id": "temi-team4",
+    "storage_bucket": "temi-team4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:894380995953:android:95ecadf307fb44906bf2d0",
+        "android_client_info": {
+          "package_name": "com.example.temicommunication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbpofOZlnAsGrxlEu_l38SZC1VvedcsgY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

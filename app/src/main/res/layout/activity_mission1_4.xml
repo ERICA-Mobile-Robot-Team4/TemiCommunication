@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="28dp"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/textTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📋 감식 결과 목록"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="30dp" />
+
+    <TextView
+        android:id="@+id/textQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="다음 중 사건과 직접 관련된\n핵심 증거를 선택하시오."
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_marginBottom="30dp" />
+
+    <Button
+        android:id="@+id/btnChoice1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="① 책상 위 먼지 분포"
+        android:textSize="18sp"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/btnChoice2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="② 벽난로 앞 혈흔"
+        android:textSize="18sp"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/btnChoice3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="③ 책장 뒤 긁힘 자국"
+        android:textSize="18sp"
+        android:layout_marginBottom="30dp" />
+
+    <TextView
+        android:id="@+id/textResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+</LinearLayout>

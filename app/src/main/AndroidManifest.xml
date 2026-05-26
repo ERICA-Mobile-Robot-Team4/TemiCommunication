@@ -18,13 +18,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity1"
+        <activity android:name=".Mission1"
             />
+        <activity android:name=".Mission1_1" />
+        <activity android:name=".Mission1_2" />
+        <activity android:name=".Mission1_3" />
+        <activity android:name=".Mission1_4" />
         <activity android:name=".MainActivity2"
             />
         <activity android:name=".MainActivity3"
             />
-        <activity android:name=".MainActivity4"
+        <activity android:name=".Mission5"
             />
         <meta-data
             android:name="com.robotemi.sdk.metadata.SKILL"
