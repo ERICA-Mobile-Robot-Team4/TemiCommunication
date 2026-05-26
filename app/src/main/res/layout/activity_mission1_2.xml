@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/textTimer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="남은 시간 : 90초"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textAttempt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="입력 횟수 : 0 / 3"
+        android:textSize="20sp"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/textTarget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="켜진 타일 : 대기 중"
+        android:textSize="20sp"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/textPressed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="밟은 타일 : 없음"
+        android:textSize="20sp"
+        android:layout_marginTop="12dp" />
+
+    <TextView
+        android:id="@+id/textResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginTop="32dp" />
+
+</LinearLayout>
