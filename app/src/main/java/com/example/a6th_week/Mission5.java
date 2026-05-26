@@ -52,7 +52,7 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
             }
         }, 5000);
     }
-ㅈ
+
     private void simulateRfidTagged() {
         if (txtHint != null) {
             txtHint.setText("힌트: 검은 나무의 이름을 기억하라");
