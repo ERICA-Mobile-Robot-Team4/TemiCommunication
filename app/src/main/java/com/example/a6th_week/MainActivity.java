@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements
         OnRobotReadyListener,
         View.OnClickListener {
 
+    Button button0;
     Button button1;
     Button button2;
     Button button3;
@@ -35,12 +36,14 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        button0 = findViewById(R.id.button0);
         button1 = findViewById(R.id.button1);
         button2 = findViewById(R.id.button2);
         button3 = findViewById(R.id.button3);
         button4 = findViewById(R.id.button4);
         robot = Robot.getInstance();
 
+        button0.setOnClickListener(this);
         button1.setOnClickListener(this);
         button2.setOnClickListener(this);
         button3.setOnClickListener(this);
@@ -50,19 +53,23 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        robot.addOnRobotReadyListener(this);
+        if(robot != null) {
+            robot.addOnRobotReadyListener(this);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        robot.removeOnRobotReadyListener(this);
+        if(robot != null){
+            robot.removeOnRobotReadyListener(this);
+        }
     }
 
 
     @Override
     public void onRobotReady(boolean isReady) {
-        if (isReady) {
+        if (isReady && robot != null) {
             try {
                 final ActivityInfo activityInfo = getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
                 robot.onStart(activityInfo);
@@ -76,12 +83,14 @@ public class MainActivity extends AppCompatActivity implements
     public void onClick(View view) {
         Class exampleContext = null;
         int id = view.getId();
-        if (id == R.id.button1) {
+        if (id == R.id.button0) {
+            exampleContext = Mission0.class;
+        } else if (id == R.id.button1) {
             exampleContext = Mission1.class;
         } else if (id == R.id.button2) {
             exampleContext = MainActivity2.class;
         } else if (id == R.id.button3) {
-            exampleContext = MainActivity3.class;
+            exampleContext = Mission3.class;
         }else if (id == R.id.button4) {
             exampleContext = Mission5.class;
         }

@@ -4,16 +4,10 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import com.robotemi.sdk.Robot;
 import com.robotemi.sdk.TtsRequest;
@@ -24,30 +18,26 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
     private Robot robot;
 
     private TextView textTimer;
-    private TextView textAngle;
-    private TextView textHoldTime;
-    private TextView textStatus;
+    private TextView textStep;
+    private TextView textScore;
     private TextView textResult;
+    //private TextView textPattern;
 
-    private DatabaseReference angleRef;
-    private ValueEventListener angleListener;
+    private Button btnUp;
+    private Button btnCenter;
+    private Button btnDown;
 
-    private CountDownTimer missionTimer;
+    private CountDownTimer timer;
 
-    private Handler handler = new Handler();
+    private final String[] correctPattern = {
+            "UP", "CENTER", "DOWN", "UP", "DOWN"
+    };
 
-    private int remainingTime = 90;
-
-    private double currentAngle = 0.0;
-    private int stableSeconds = 0;
+    private int currentStep = 0;
+    private int score = 20;
+    private int remainingTime = 40;
 
     private boolean isFinished = false;
-    private boolean isStableNow = false;
-
-    private final double TARGET_ANGLE = 15.0;
-    private final double ALLOW_RANGE = 2.0;
-
-    private Runnable stableRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,101 +47,88 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
         robot = Robot.getInstance();
 
         textTimer = findViewById(R.id.textTimer);
-        textAngle = findViewById(R.id.textAngle);
-        textHoldTime = findViewById(R.id.textHoldTime);
-        textStatus = findViewById(R.id.textStatus);
+        textStep = findViewById(R.id.textStep);
+        textScore = findViewById(R.id.textScore);
         textResult = findViewById(R.id.textResult);
+        //textPattern = findViewById(R.id.textPattern);
 
-        angleRef = FirebaseDatabase.getInstance()
-                .getReference("mission1_3")
-                .child("angle");
+        btnUp = findViewById(R.id.btnUp);
+        btnCenter = findViewById(R.id.btnCenter);
+        btnDown = findViewById(R.id.btnDown);
 
-        speak("책장 이동 흔적 분석을 시작합니다. 목표 각도를 5초 동안 유지하세요.");
+        updateScreen();
 
-        startMissionTimer();
-        startStableCounter();
-        listenFirebaseAngle();
+        speak("책장 스캔 미션을 시작합니다. 위쪽, 정면, 아래쪽, 위쪽, 아래쪽 순서로 시야를 조정하세요.");
+
+        btnUp.setOnClickListener(view -> checkInput("UP"));
+        btnCenter.setOnClickListener(view -> checkInput("CENTER"));
+        btnDown.setOnClickListener(view -> checkInput("DOWN"));
+
+        startTimer();
     }
 
-    private void listenFirebaseAngle() {
-        angleListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                if (isFinished) return;
+    private void checkInput(String input) {
+        if (isFinished) return;
 
-                Double angleValue = snapshot.getValue(Double.class);
+        moveTemiHead(input);
 
-                if (angleValue == null) {
-                    textAngle.setText("현재 각도 : 대기 중");
-                    return;
-                }
+        String correctInput = correctPattern[currentStep];
 
-                currentAngle = angleValue;
-                textAngle.setText("현재 각도 : " + currentAngle + "도");
+        if (input.equals(correctInput)) {
+            currentStep++;
 
-                checkStableRange(currentAngle);
+            if (currentStep >= correctPattern.length) {
+                finishMission(score, "스캔 완료. 책장 이동 흔적을 분석했습니다. " + score + "점 획득.");
+                return;
             }
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-                textStatus.setText("Firebase 값을 읽는 중 오류가 발생했습니다.");
-            }
-        };
-
-        angleRef.addValueEventListener(angleListener);
-    }
-
-    private void checkStableRange(double angle) {
-        double minAngle = TARGET_ANGLE - ALLOW_RANGE;
-        double maxAngle = TARGET_ANGLE + ALLOW_RANGE;
-
-        if (angle >= minAngle && angle <= maxAngle) {
-            if (!isStableNow) {
-                isStableNow = true;
-                speak("분석 진행 중입니다. 안정 상태를 유지하세요.");
-            }
-
-            textStatus.setText("상태 : 분석 진행 중");
+            textResult.setText("정확합니다. 다음 시야를 조정하세요.");
+            speak("정확합니다.");
 
         } else {
-            if (isStableNow) {
-                speak("안정성을 유지하십시오.");
+            score -= 4;
+
+            if (score < 0) {
+                score = 0;
             }
 
-            isStableNow = false;
-            stableSeconds = 0;
+            textResult.setText("잘못된 시야 조정입니다. 4점 감점.");
+            speak("잘못된 시야 조정입니다. 4점 감점입니다.");
 
-            textStatus.setText("상태 : 목표 범위를 벗어났습니다.");
-            textHoldTime.setText("유지 시간 : 0초");
+            if (score <= 0) {
+                finishMission(0, "점수가 모두 소진되었습니다. 책장 스캔에 실패했습니다.");
+                return;
+            }
+        }
+
+        updateScreen();
+    }
+
+    private void moveTemiHead(String direction) {
+        if (robot == null) return;
+
+        if (direction.equals("UP")) {
+            robot.tiltAngle(15, 1.0f);
+        } else if (direction.equals("CENTER")) {
+            robot.tiltAngle(0, 1.0f);
+        } else if (direction.equals("DOWN")) {
+            robot.tiltAngle(-15, 1.0f);
         }
     }
 
-    private void startStableCounter() {
-        stableRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (!isFinished) {
-                    if (isStableNow) {
-                        stableSeconds++;
+    private void updateScreen() {
+        textTimer.setText("남은 시간 : " + remainingTime + "초");
+        textScore.setText("현재 점수 : " + score + "점");
+        textStep.setText("진행 단계 : " + currentStep + " / " + correctPattern.length);
 
-                        textHoldTime.setText("유지 시간 : " + stableSeconds + "초");
-
-                        if (stableSeconds >= 5) {
-                            finishMission(20, "5초 안정 유지 성공입니다. 20점 획득.");
-                            return;
-                        }
-                    }
-
-                    handler.postDelayed(this, 1000);
-                }
-            }
-        };
-
-        handler.postDelayed(stableRunnable, 1000);
+//        textPattern.setText(
+//                "목표 순서\n" +
+//                        "위쪽 → 정면 → 아래쪽 → 위쪽 → 아래쪽"
+//        );
     }
 
-    private void startMissionTimer() {
-        missionTimer = new CountDownTimer(90000, 1000) {
+    private void startTimer() {
+        timer = new CountDownTimer(20000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 remainingTime = (int) (millisUntilFinished / 1000);
@@ -161,34 +138,26 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
             @Override
             public void onFinish() {
                 if (!isFinished) {
-                    if (stableSeconds >= 3) {
-                        finishMission(10, "3초 이상 안정 유지했습니다. 10점 획득.");
-                    } else {
-                        finishMission(0, "분석 실패입니다. 0점입니다.");
-                    }
+                    finishMission(score, "시간 종료. 현재 점수는 " + score + "점입니다.");
                 }
             }
         };
 
-        missionTimer.start();
+        timer.start();
     }
 
-    private void finishMission(int score, String message) {
+    private void finishMission(int finalScore, String message) {
         isFinished = true;
 
-        if (missionTimer != null) {
-            missionTimer.cancel();
+        if (timer != null) {
+            timer.cancel();
         }
 
-        if (stableRunnable != null) {
-            handler.removeCallbacks(stableRunnable);
-        }
+        btnUp.setEnabled(false);
+        btnCenter.setEnabled(false);
+        btnDown.setEnabled(false);
 
-        if (angleRef != null && angleListener != null) {
-            angleRef.removeEventListener(angleListener);
-        }
-
-        saveScore(score);
+        saveScore(finalScore);
 
         textResult.setText(message);
         speak(message);
@@ -196,31 +165,36 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
         textResult.postDelayed(() -> finish(), 2500);
     }
 
-    private void saveScore(int score) {
+    private void saveScore(int finalScore) {
         getSharedPreferences("MISSION_SCORE", MODE_PRIVATE)
                 .edit()
-                .putInt("mission1_3", score)
+                .putInt("mission1_3", finalScore)
+                .putBoolean("mission1_3_completed", true)
                 .apply();
     }
 
     private void speak(String message) {
-        TtsRequest ttsRequest = TtsRequest.create(message, true);
+        if (robot == null) return;
+
+        TtsRequest ttsRequest = TtsRequest.create(message, false); // temi ui에서 보이게 할지 안할지
         robot.speak(ttsRequest);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        robot.addOnRobotReadyListener(this);
+
+        if (robot != null) {
+            robot.addOnRobotReadyListener(this);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        robot.removeOnRobotReadyListener(this);
 
-        if (angleRef != null && angleListener != null) {
-            angleRef.removeEventListener(angleListener);
+        if (robot != null) {
+            robot.removeOnRobotReadyListener(this);
         }
     }
 
@@ -228,12 +202,8 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
     protected void onDestroy() {
         super.onDestroy();
 
-        if (missionTimer != null) {
-            missionTimer.cancel();
-        }
-
-        if (stableRunnable != null) {
-            handler.removeCallbacks(stableRunnable);
+        if (timer != null) {
+            timer.cancel();
         }
     }
 

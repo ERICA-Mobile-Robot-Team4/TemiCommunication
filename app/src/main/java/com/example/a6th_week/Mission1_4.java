@@ -14,7 +14,7 @@ import com.robotemi.sdk.listeners.OnRobotReadyListener;
 
 public class Mission1_4 extends AppCompatActivity implements OnRobotReadyListener {
 
-    Robot robot; // hello
+    Robot robot;
 
     TextView textResult;
 
@@ -23,11 +23,15 @@ public class Mission1_4 extends AppCompatActivity implements OnRobotReadyListene
     Button btnChoice3;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) { // 초반에 tts로 나오게끔 하기
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mission1_4);
 
         robot = Robot.getInstance();
+
+        TtsRequest ttsRequest = TtsRequest.create("다음 중 사건과 직접 관련된 핵심 증거를 선택하시오.", true);
+        robot.speak(ttsRequest);
+
 
         textResult = findViewById(R.id.textResult);
 
@@ -70,7 +74,7 @@ public class Mission1_4 extends AppCompatActivity implements OnRobotReadyListene
         // 화면에 결과 표시
         textResult.setText(message);
 
-        // Temi가 말하기
+        // Temi가 말하기 -- 임시 주석 처리
         TtsRequest ttsRequest = TtsRequest.create(message, true);
         robot.speak(ttsRequest);
 
@@ -87,6 +91,7 @@ public class Mission1_4 extends AppCompatActivity implements OnRobotReadyListene
         getSharedPreferences("MISSION_SCORE", MODE_PRIVATE)
                 .edit()
                 .putInt("mission1_4", score)
+                .putBoolean("mission1_4_completed", true)
                 .apply();
     }
 
@@ -119,4 +124,6 @@ public class Mission1_4 extends AppCompatActivity implements OnRobotReadyListene
             }
         }
     }
+
+
 }

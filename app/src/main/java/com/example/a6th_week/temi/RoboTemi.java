@@ -21,12 +21,14 @@ public class RoboTemi  {
     }
 
     public void speak(String text){
+        if(robot == null) return ; //주석 삭제
         //말하려는 것의 앞뒤 띄어쓰기를 제거하고 , 말하는 내용을 화면에 보여줄지 여부
         TtsRequest ttsRequest = TtsRequest.create(text.trim(), true);
         robot.speak(ttsRequest);// 말하기
     }
 
     public void saveLocation(String location) {
+        if(robot == null) return ; //주석 삭제
         String loc = location.toLowerCase().trim();// 장소 관련 이름을 소문자로 만들고 앞뒤 띄어쓰기를 제거
         boolean result = robot.saveLocation(loc);// 장소를 저장
         if (result) {// 결과 확인

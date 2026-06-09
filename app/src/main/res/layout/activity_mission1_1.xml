@@ -1,35 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layoutMission1_1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="30dp">
+    android:gravity="center_horizontal"
+    android:padding="24dp"
+    android:background="#FFFFFF">
 
     <TextView
         android:id="@+id/textTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="미션 1-1 혈흔 위치 탐색"
+        android:text="미션 1-1 단서 순서 미션"
         android:textSize="26sp"
         android:textStyle="bold"
-        android:layout_marginBottom="30dp" />
+        android:textColor="#111111"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
 
     <TextView
         android:id="@+id/textTimer"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="남은 시간: 90초"
-        android:textSize="24sp"
-        android:layout_marginBottom="30dp" />
+        android:text="남은 시간 : 90초"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#D32F2F"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
 
     <TextView
         android:id="@+id/textStatus"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="RFID 반응 대기 중..."
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:text="미션 준비 중"
+        android:textSize="21sp"
+        android:textColor="#222222"
+        android:gravity="center"
+        android:padding="24dp"
+        android:background="#F1F1F1"
+        android:layout_marginBottom="32dp" />
+
+    <TextView
+        android:id="@+id/textResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="#0D47A1"
+        android:gravity="center"
+        android:padding="24dp" />
 
 </LinearLayout>

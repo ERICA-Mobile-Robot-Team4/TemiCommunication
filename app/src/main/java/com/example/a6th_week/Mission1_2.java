@@ -4,6 +4,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,27 +21,22 @@ import com.robotemi.sdk.listeners.OnRobotReadyListener;
 
 public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListener {
 
-    private Robot robot;
+    Robot robot;
 
-    private TextView textTimer;
-    private TextView textTarget;
-    private TextView textPressed;
-    private TextView textAttempt;
-    private TextView textResult;
+    TextView textTimer;
+    TextView textStatus;
+    TextView textScore;
+    TextView textResult;
 
-    private DatabaseReference missionRef;
-    private ValueEventListener missionListener;
+    DatabaseReference missionRef;
+    DatabaseReference missionStartRef;
+    ValueEventListener missionListener;
 
-    private CountDownTimer timer;
+    CountDownTimer timer;
 
-    private int attemptCount = 0;   // 센서 누른 횟수
-    private int successCount = 0;   // 성공 횟수
-    private int remainingTime = 90;
+    boolean isFinished = false;
 
-    private boolean isFinished = false;
-    private boolean isChecking = false;
-
-    private int lastPressedTile = 0;
+    final int TOTAL_TIME = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,157 +46,93 @@ public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListene
         robot = Robot.getInstance();
 
         textTimer = findViewById(R.id.textTimer);
-        textTarget = findViewById(R.id.textTarget);
-        textPressed = findViewById(R.id.textPressed);
-        textAttempt = findViewById(R.id.textAttempt);
+        textStatus = findViewById(R.id.textStatus);
+        textScore = findViewById(R.id.textScore);
         textResult = findViewById(R.id.textResult);
 
-        missionRef = FirebaseDatabase.getInstance()
-                .getReference("mission1_2");
+        missionRef = FirebaseDatabase.getInstance().getReference("missionresult1_2");
+        missionStartRef = FirebaseDatabase.getInstance().getReference("missionstart1_2");
 
-        updateAttemptText();
+        missionStartRef.setValue(0);
+        missionRef.setValue(-1);
 
-        speak("충격 지점 포착 미션을 시작합니다. 불이 켜진 타일을 밟으세요.");
+        textTimer.setText("남은 시간 : " + TOTAL_TIME + "초");
+        textStatus.setText("미션 안내 중입니다.\n안내가 끝나면 미션이 시작됩니다.");
+        textScore.setText("최종 점수 대기 중");
+        textResult.setText("");
 
-        startTimer();
-        listenFirebase();
+        startMissionGuide();
     }
 
-    private void listenFirebase() {
+    private void startMissionGuide() {
+        String guide =
+                "지금부터 3개의 LED 중 랜덤으로 LED가 점등됩니다. " +
+                        "LED가 점등되면 해당 색상 카드를 시간 안에 인식시키십시오. " +
+                        "총 10번 진행됩니다.";
+
+        speak(guide);
+
+        textResult.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isFinished) return;
+
+                missionStartRef.setValue(1);
+
+                textStatus.setText("미션 진행 중입니다.\nLED 점등과 RFID 인식을 진행하세요.");
+
+                startTimer();
+                listenMissionResult();
+            }
+        }, 11000);
+    }
+
+    private void listenMissionResult() {
         missionListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                if (isFinished || isChecking) return;
+                if (isFinished) return;
 
-                // 아두이노 측에서 불이 켜진 타일과 누른 타일이 일치하는지에 대한 값으로 줄지에 대해서 물어보기
-                Integer targetTile = snapshot.child("targetTile").getValue(Integer.class);
-                Integer pressedTile = snapshot.child("pressedTile").getValue(Integer.class);
+                Object value = snapshot.getValue();
 
-                if (targetTile == null) {
-                    textTarget.setText("켜진 타일 : 대기 중");
+                if (value == null) return;
+
+                int finalScore;
+
+                try {
+                    finalScore = Integer.parseInt(value.toString());
+                } catch (NumberFormatException e) {
                     return;
                 }
 
-                textTarget.setText("켜진 타일 : " + targetTile + "번");
+                if (finalScore == -1) return;
 
-                if (pressedTile == null || pressedTile == 0) {
-                    textPressed.setText("밟은 타일 : 없음");
-                    lastPressedTile = 0;
-                    return;
-                }
-
-                if (pressedTile == lastPressedTile) {
-                    return;
-                }
-
-                lastPressedTile = pressedTile;
-                textPressed.setText("밟은 타일 : " + pressedTile + "번");
-
-                checkPressureSensor(targetTile, pressedTile);
+                finishMission(finalScore);
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
-                textResult.setText("Firebase 값을 읽는 중 오류가 발생했습니다.");
+                textStatus.setText("Firebase 값을 읽는 중 오류가 발생했습니다.");
             }
         };
 
         missionRef.addValueEventListener(missionListener);
     }
 
-    private void checkPressureSensor(int targetTile, int pressedTile) {
-        isChecking = true;
-
-        attemptCount++;
-
-        if (targetTile == pressedTile) {
-            successCount++;
-
-            textResult.setText(
-                    attemptCount + "번째 입력 성공!\n" +
-                            "성공 횟수 : " + successCount + " / 3"
-            );
-
-            speak("성공입니다.");
-
-        } else {
-            textResult.setText(
-                    attemptCount + "번째 입력 실패.\n" +
-                            "불이 켜진 타일과 다른 타일을 밟았습니다.\n" +
-                            "성공 횟수 : " + successCount + " / 3"
-            );
-
-            speak("실패입니다. 다른 타일을 밟았습니다.");
-        }
-
-        updateAttemptText();
-
-        textResult.postDelayed(() -> {
-            if (attemptCount >= 3) {
-                finishMission();
-            } else {
-                resetPressedTile();
-                isChecking = false;
-                speak("다음 타일을 확인하세요.");
-            }
-        }, 2000);
-    }
-
-    private void resetPressedTile() {
-        missionRef.child("pressedTile").setValue(0);
-        lastPressedTile = 0;
-    }
-
-    private void updateAttemptText() {
-        textAttempt.setText("입력 횟수 : " + attemptCount + " / 3");
-    }
-
-    private void finishMission() {
-        isFinished = true;
-
-        if (timer != null) {
-            timer.cancel();
-        }
-
-        if (missionRef != null && missionListener != null) {
-            missionRef.removeEventListener(missionListener);
-        }
-
-        int score;
-
-        if (successCount == 3) {
-            score = 20;
-        } else if (successCount == 2) {
-            score = 12;
-        } else if (successCount == 1) {
-            score = 5;
-        } else {
-            score = 0;
-        }
-
-        saveScore(score);
-
-        String message = "미션 종료. 총 " + successCount + "회 성공했습니다. "
-                + score + "점 획득.";
-
-        textResult.setText(message);
-        speak(message);
-
-        textResult.postDelayed(() -> finish(), 2500);
-    }
-
     private void startTimer() {
-        timer = new CountDownTimer(90000, 1000) {
+        timer = new CountDownTimer(TOTAL_TIME * 1000L, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                remainingTime = (int) (millisUntilFinished / 1000);
+                int remainingTime = (int) (millisUntilFinished / 1000);
                 textTimer.setText("남은 시간 : " + remainingTime + "초");
             }
 
             @Override
             public void onFinish() {
                 if (!isFinished) {
-                    finishMission();
+                    textTimer.setText("남은 시간 : 0초");
+                    textStatus.setText("제한 시간이 종료되었습니다.\n최종 점수 결과를 기다리는 중입니다.");
+                    speak("제한 시간이 종료되었습니다. 최종 점수 결과를 기다립니다.");
                 }
             }
         };
@@ -208,32 +140,79 @@ public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListene
         timer.start();
     }
 
+    private void finishMission(int score) {
+        if(isFinished) return;
+        isFinished = true;
+
+        if (timer != null) {
+            timer.cancel();
+        }
+
+        removeFirebaseListener();
+        saveScore(score);
+
+        textTimer.setText("미션 종료");
+        textStatus.setText("총 10번 진행이 완료되었습니다.");
+        textScore.setText("최종 점수 : " + score + "점");
+        textResult.setText(score + "점을 획득했습니다.");
+
+        speak("미션이 종료되었습니다. 최종 점수는 " + score + "점입니다.");
+
+        textResult.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        }, 4000);
+    }
+
     private void saveScore(int score) {
         getSharedPreferences("MISSION_SCORE", MODE_PRIVATE)
                 .edit()
                 .putInt("mission1_2", score)
+                .putBoolean("mission1_2_completed", true)
                 .apply();
     }
 
     private void speak(String message) {
-        TtsRequest ttsRequest = TtsRequest.create(message, true);
-        robot.speak(ttsRequest);
+        try {
+            if (robot == null) {
+                Log.e("TTS_ERROR", "robot is null");
+                return;
+            }
+
+            TtsRequest ttsRequest = TtsRequest.create(message, false);
+            robot.speak(ttsRequest);
+
+        } catch (Exception e) {
+            Log.e("TTS_ERROR", "speak crash: " + message, e);
+        }
+    }
+
+    private void removeFirebaseListener() {
+        if (missionRef != null && missionListener != null) {
+            missionRef.removeEventListener(missionListener);
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        robot.addOnRobotReadyListener(this);
+
+        if (robot != null) {
+            robot.addOnRobotReadyListener(this);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        robot.removeOnRobotReadyListener(this);
 
-        if (missionRef != null && missionListener != null) {
-            missionRef.removeEventListener(missionListener);
+        if (robot != null) {
+            robot.removeOnRobotReadyListener(this);
         }
+
+        removeFirebaseListener();
     }
 
     @Override
@@ -243,6 +222,8 @@ public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListene
         if (timer != null) {
             timer.cancel();
         }
+
+        removeFirebaseListener();
     }
 
     @Override

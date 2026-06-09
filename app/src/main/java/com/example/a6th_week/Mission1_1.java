@@ -5,15 +5,18 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.DatabaseError;
 
 import com.robotemi.sdk.Robot;
 import com.robotemi.sdk.TtsRequest;
@@ -27,18 +30,18 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
     TextView textStatus;
     TextView textResult;
 
-    DatabaseReference rfidRef;
-    ValueEventListener rfidListener;
+    DatabaseReference missionStartRef;
+    DatabaseReference ledStatusRef;
+    DatabaseReference resultRef;
+
+    ValueEventListener ledStatusListener;
+    ValueEventListener resultListener;
 
     CountDownTimer timer;
-    Handler handler = new Handler();
+    Handler handler = new Handler(Looper.getMainLooper());
 
-    int remainingTime = 90;
     boolean isFinished = false;
-    boolean isHoldingExact = false;
-    String currentState = "";
-
-    Runnable successRunnable;
+    boolean isRfidPhase = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,134 +54,140 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
         textStatus = findViewById(R.id.textStatus);
         textResult = findViewById(R.id.textResult);
 
-        rfidRef = FirebaseDatabase.getInstance()
-                .getReference("mission1_1")
-                .child("rfidValue");
+        missionStartRef = FirebaseDatabase.getInstance().getReference("missionstart1_1");
+        ledStatusRef = FirebaseDatabase.getInstance().getReference("mission1_1");
+        resultRef = FirebaseDatabase.getInstance().getReference("missionresult1_1");
 
-        speak("혈흔 위치 탐색을 시작합니다. RFID 반응을 확인하세요.");
+        textStatus.setText("단서 순서 미션을 시작합니다.");
+        textResult.setText("");
 
-        startTimer();
-        listenFirebaseValue();
-    }
+        missionStartRef.setValue(0);
+        ledStatusRef.setValue(0);
+        resultRef.setValue(-1);
 
-    private void listenFirebaseValue() {
-        rfidListener = new ValueEventListener() {
+        //speakIntroAndStartMission();
+        speak("혈흔 위치를 탐색합니다. LED가 랜덤으로 15번 점등됩니다. 각 LED가 몇 번 점등되었는지 기억하시길 바랍니다.");
+
+        textResult.postDelayed(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void run() {
                 if (isFinished) return;
 
-                Integer rfidValue = snapshot.getValue(Integer.class);
+                missionStartRef.setValue(1);
 
-                if (rfidValue == null) {
-                    textStatus.setText("RFID 값 대기 중");
-                    return;
+                // 멘트 바꾸기
+                textStatus.setText("각 LED가 몇 번 점등되었는지 기억하십시오");
+
+                startTimer();
+                listenLedStatus();
+            }
+        }, 9000);
+
+    }
+
+//    private void speakIntroAndStartMission() {
+//        String introMessage = "혈흔 위치를 탐색합니다. LED가 랜덤으로 10번 점등됩니다. 각 LED가 몇 번 점등되었는지 기억하시길 바랍니다.";
+//
+//        TtsRequest ttsRequest = TtsRequest.create(introMessage, true);
+//
+//        ttsRequest.setOnTtsStatusChangedListener(new TtsRequest.OnTtsStatusChangedListener() {
+//            @Override
+//            public void onTtsStatusChanged(TtsRequest.Status status) {
+//                if (status == TtsRequest.Status.COMPLETED && !isFinished) {
+//                    missionStartRef.setValue(1);
+//                }
+//            }
+//        });
+//
+//        robot.speak(ttsRequest);
+//    }
+
+
+    private void startArduinoMission() {
+        missionStartRef.setValue(1)
+                .addOnSuccessListener(unused -> {
+                    textStatus.setText("LED 점등 시작 신호를 보냈습니다.\nLED 점등 완료를 기다리는 중입니다.");
+                    Toast.makeText(this, "missionstart1_1 = 1 전송 완료", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    textStatus.setText("missionstart1_1 값을 Firebase에 쓰지 못했습니다.");
+                    Toast.makeText(this, "Firebase 쓰기 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void listenLedStatus() {
+        ledStatusListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (isFinished || isRfidPhase) return;
+
+                Long ledStatusNumber = snapshot.getValue(Long.class);
+                Log.d("MISSION1_1",
+                        "Firebase value = " + ledStatusNumber);
+                if (ledStatusNumber == null) return;
+
+                int ledStatus = ledStatusNumber.intValue();
+
+                if (ledStatus == 1) {
+                    isRfidPhase = true;
+
+                    textStatus.setText("LED 점등 완료\nRFID 태그 인식 대기 중입니다.");
+                    speak("지금부터 가장 많이 깜빡인 순서대로 RFID 태그를 인식하세요.");
+
+                    listenResult();
                 }
-
-                judgeDistance(rfidValue);
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
-                textStatus.setText("Firebase 값을 읽는 중 오류가 발생했습니다.");
+                textStatus.setText("Firebase mission1_1 값을 읽는 중 오류가 발생했습니다.");
             }
         };
 
-        rfidRef.addValueEventListener(rfidListener);
+        ledStatusRef.addValueEventListener(ledStatusListener);
     }
 
-    private void judgeDistance(int rfidValue) {
+    private void listenResult() {
+        resultListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (isFinished) return;
 
-        if (rfidValue < 40) {
+                Long resultNumber = snapshot.getValue(Long.class);
+                Log.d("MISSION1_1",
+                        "Firebase value = " + resultNumber);
+                if (resultNumber == null) return;
 
-            cancelExactHold();
-
-            textStatus.setText("멀리 있음 → 반응 없음\n현재 값 : " + rfidValue);
-
-            // 상태 변경 시에만 말하기
-            if (!currentState.equals("FAR")) {
-                currentState = "FAR";
-
-                speak("반응이 없습니다.");
+                int result = resultNumber.intValue();
+                if(result == -1) return ;
+                if (result == 1) {
+                    finishMission(20, "정답입니다.\n20점을 획득합니다.");
+                } else if (result == 0) {
+                    finishMission(0, "오답입니다.\n점수를 획득하지 못하셨습니다.");
+                }
             }
 
-        } else if (rfidValue < 80) {
-
-            cancelExactHold();
-
-            textStatus.setText("가까워지는 중 → 반응 감지 중...\n현재 값 : " + rfidValue);
-
-            if (!currentState.equals("NEAR")) {
-                currentState = "NEAR";
-
-                speak("반응을 감지 중입니다.");
+            @Override
+            public void onCancelled(DatabaseError error) {
+                textStatus.setText("Firebase missionresult1_1 값을 읽는 중 오류가 발생했습니다.");
             }
+        };
 
-        } else {
-
-            textStatus.setText("정확한 위치 → 강한 반응 감지!\n현재 값 : " + rfidValue);
-
-            if (!currentState.equals("EXACT")) {
-                currentState = "EXACT";
-
-                speak("강한 반응을 감지했습니다. 위치를 유지하세요.");
-            }
-
-            if (!isHoldingExact) {
-
-                isHoldingExact = true;
-
-                successRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-
-                        if (!isFinished && isHoldingExact) {
-
-                            int score;
-
-                            if (remainingTime >= 60) {
-                                score = 20;
-                                finishMission(
-                                        score,
-                                        "빠른 성공입니다. 혈흔 위치를 정확히 탐색했습니다."
-                                );
-
-                            } else {
-
-                                score = 10;
-                                finishMission(
-                                        score,
-                                        "성공입니다. 혈흔 위치를 탐색했습니다."
-                                );
-                            }
-                        }
-                    }
-                };
-
-                handler.postDelayed(successRunnable, 2000);
-            }
-        }
-    }
-
-    private void cancelExactHold() {
-        isHoldingExact = false;
-
-        if (successRunnable != null) {
-            handler.removeCallbacks(successRunnable);
-        }
+        resultRef.addValueEventListener(resultListener);
     }
 
     private void startTimer() {
         timer = new CountDownTimer(90000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                remainingTime = (int) (millisUntilFinished / 1000);
+                int remainingTime = (int) (millisUntilFinished / 1000);
                 textTimer.setText("남은 시간 : " + remainingTime + "초");
             }
 
             @Override
             public void onFinish() {
                 if (!isFinished) {
-                    finishMission(0, "시간 초과입니다. 혈흔 위치 탐색에 실패했습니다. 0점입니다.");
+                    finishMission(0, "시간 초과입니다.\n점수를 획득하지 못하셨습니다.");
                 }
             }
         };
@@ -187,48 +196,93 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
     }
 
     private void finishMission(int score, String message) {
+        if (isFinished) return;
+
         isFinished = true;
 
-        if (timer != null) {
-            timer.cancel();
+        try {
+            if (timer != null) {
+                timer.cancel();
+            }
+
+            handler.removeCallbacksAndMessages(null);
+            removeFirebaseListeners();
+            saveScore(score);
+
+            textStatus.setText("미션 종료");
+            textResult.setText(message);
+            speak(message);
+
+            textResult.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                }
+            }, 3000);
+
+        } catch (Exception e) {
+            Log.e("MISSION_CRASH", "finishMission crash", e);
         }
-
-        cancelExactHold();
-
-        saveScore(score);
-
-        textResult.setText(message);
-        speak(message);
-
-        textResult.postDelayed(() -> finish(), 2000);
     }
 
     private void saveScore(int score) {
         getSharedPreferences("MISSION_SCORE", MODE_PRIVATE)
                 .edit()
                 .putInt("mission1_1", score)
+                .putBoolean("mission1_1_completed", true)
                 .apply();
     }
 
+//    private void speak(String message) {
+//        if (robot != null) {
+//            TtsRequest ttsRequest = TtsRequest.create(message, false);
+//            robot.speak(ttsRequest);
+//        }
+//    }
+
     private void speak(String message) {
-        TtsRequest ttsRequest = TtsRequest.create(message, true);
-        robot.speak(ttsRequest);
+        try {
+            if (robot == null) {
+                Log.e("TTS_ERROR", "robot is null");
+                return;
+            }
+
+            TtsRequest ttsRequest = TtsRequest.create(message, false);
+            robot.speak(ttsRequest);
+
+        } catch (Exception e) {
+            Log.e("TTS_ERROR", "speak crash: " + message, e);
+        }
+    }
+
+    private void removeFirebaseListeners() {
+        if (ledStatusRef != null && ledStatusListener != null) {
+            ledStatusRef.removeEventListener(ledStatusListener);
+        }
+
+        if (resultRef != null && resultListener != null) {
+            resultRef.removeEventListener(resultListener);
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        robot.addOnRobotReadyListener(this);
+
+        if (robot != null) {
+            robot.addOnRobotReadyListener(this);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        robot.removeOnRobotReadyListener(this);
 
-        if (rfidRef != null && rfidListener != null) {
-            rfidRef.removeEventListener(rfidListener);
+        if (robot != null) {
+            robot.removeOnRobotReadyListener(this);
         }
+
+        removeFirebaseListeners();
     }
 
     @Override
@@ -239,7 +293,8 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
             timer.cancel();
         }
 
-        cancelExactHold();
+        handler.removeCallbacksAndMessages(null);
+        removeFirebaseListeners();
     }
 
     @Override

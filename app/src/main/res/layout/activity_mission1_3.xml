@@ -3,47 +3,78 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📚 책장 스캔 미션"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center" />
 
     <TextView
         android:id="@+id/textTimer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="남은 시간 : 90초"
+        android:text="남은 시간 : 20초"
         android:textSize="22sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/textAngle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="현재 각도 : 대기 중"
-        android:textSize="20sp"
+        android:textStyle="bold"
         android:layout_marginTop="24dp" />
 
     <TextView
-        android:id="@+id/textHoldTime"
+        android:id="@+id/textScore"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="유지 시간 : 0초"
-        android:textSize="20sp"
-        android:layout_marginTop="16dp" />
+        android:text="현재 점수 : 20점"
+        android:textSize="22sp"
+        android:layout_marginTop="12dp" />
 
     <TextView
-        android:id="@+id/textStatus"
+        android:id="@+id/textStep"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="상태 : 분석 대기 중"
+        android:text="진행 단계 : 0 / 5"
         android:textSize="20sp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="12dp" />
+
+<!--    <TextView-->
+<!--        android:id="@+id/textPattern"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="목표 순서\n위쪽 → 정면 → 아래쪽 → 위쪽 → 아래쪽"-->
+<!--        android:textSize="20sp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:layout_marginTop="28dp" />-->
 
     <TextView
         android:id="@+id/textResult"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="22sp"
-        android:textStyle="bold"
+        android:text="화면의 순서에 맞게 \nTemi의 시야를 조정하세요."
+        android:textSize="20sp"
+        android:layout_marginTop="28dp" />
+
+    <Button
+        android:id="@+id/btnUp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="위쪽 보기"
         android:layout_marginTop="32dp" />
+
+    <Button
+        android:id="@+id/btnCenter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="정면 보기"
+        android:layout_marginTop="12dp" />
+
+    <Button
+        android:id="@+id/btnDown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="아래쪽 보기"
+        android:layout_marginTop="12dp" />
 
 </LinearLayout>
