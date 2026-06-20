@@ -1,7 +1,11 @@
 package com.example.a6th_week;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -21,8 +25,9 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
     private Robot robot;
     private int score = 100;
     private TextView txtHint;
+    private TextView btnBack;
+    private LinearLayout btnClue;
 
-    // 단서 분할 연출용 레이아웃 및 텍스트뷰 변수
     private LinearLayout layoutClueContainer;
     private TextView txtClueLeft, txtClueRight;
 
@@ -35,6 +40,14 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
 
+    private TextView txtRfidStatusDashboard;
+    private TextView txtRfidCompleteLabel;
+    // 🛠️ txtVoiceStatusDashboard 변수 선언 제거 완료
+    private TextView txtVoiceHintContent;
+    private LinearLayout layoutMainGame;
+    private LinearLayout layoutRfidPanel;
+    private LinearLayout layoutVoicePanel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +59,14 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
 
         txtHint = findViewById(R.id.txtHint);
 
-        // 분할 뷰 매핑
+        txtRfidStatusDashboard = findViewById(R.id.txtRfidStatusDashboard);
+        txtRfidCompleteLabel = findViewById(R.id.txtRfidCompleteLabel);
+        // 🛠️ txtVoiceStatusDashboard = findViewById(...) 제거 완료
+        txtVoiceHintContent = findViewById(R.id.txtVoiceHintContent);
+        layoutMainGame = findViewById(R.id.layoutMainGame);
+        layoutRfidPanel = findViewById(R.id.layoutRfidPanel);
+        layoutVoicePanel = findViewById(R.id.layoutVoicePanel);
+
         layoutClueContainer = findViewById(R.id.layoutClueContainer);
         txtClueLeft = findViewById(R.id.txtClueLeft);
         txtClueRight = findViewById(R.id.txtClueRight);
@@ -57,17 +77,31 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
         btnHint3 = findViewById(R.id.btnHint3);
         btnHint4 = findViewById(R.id.btnHint4);
         btnVoiceStart = findViewById(R.id.btnVoiceStart);
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+//            if (timer != null) {
+//                timer.cancel();
+//            }
+//
+//            handler.removeCallbacksAndMessages(null);
+//            removeFirebaseListeners();
+//
+//            Intent intent = new Intent(Mission3.this, MainActivity.class);
+//            startActivity(intent);
+            finish();
+        });
+
+        btnClue = findViewById(R.id.btnClue);
+        btnClue.setOnClickListener(v -> {
+            Intent intent = new Intent(Mission5.this, ClueActivity.class);
+            startActivity(intent);
+        });
 
         txtHint.setMovementMethod(new android.text.method.ScrollingMovementMethod());
-
-        // 분할 텍스트뷰 스크롤 활성화
         txtClueLeft.setMovementMethod(new android.text.method.ScrollingMovementMethod());
         txtClueRight.setMovementMethod(new android.text.method.ScrollingMovementMethod());
 
-        btnVoiceStart.setVisibility(View.GONE);
-        layoutHintOptions.setVisibility(View.GONE);
-        layoutClueContainer.setVisibility(View.GONE); // 처음엔 숨김
-
+        initInitialUIState();
         setupHintButtons();
 
         btnVoiceStart.setOnClickListener(new View.OnClickListener() {
@@ -78,13 +112,17 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
                     return;
                 }
                 robot.wakeup();
-                txtHint.setText("듣고 있습니다... 정답을 말씀하세요!");
+
+                txtVoiceHintContent.setVisibility(View.VISIBLE);
+                txtVoiceHintContent.setText("힌트: 검은 나무의 이름을 기억하라\n(테미가 음성을 녹음 중입니다...)");
+
+                layoutVoicePanel.setBackgroundResource(R.drawable.panel_yellow_border);
+                // 🛠️ txtVoiceStatusDashboard 텍스트 및 컬러 변경 코드 제거 완료
             }
         });
 
-        firebaseDatabase = FirebaseDatabase.getInstance();
+        firebaseDatabase = FirebaseDatabase.getInstance("https://temicommunication-ffc22-default-rtdb.firebaseio.com");
         databaseReference = firebaseDatabase.getReference("temi_command");
-
         databaseReference.setValue("START_RED");
 
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -104,18 +142,17 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
                             else if (command.equals("RESET")) {
                                 score = 100;
                                 isRfidVerified = false;
-                                layoutHintOptions.setVisibility(View.GONE);
-                                btnVoiceStart.setVisibility(View.GONE);
 
-                                // 리셋 시 사용해서 숨겨졌던 힌트 버튼들을 다시 보이게 복구합니다.
+                                initInitialUIState();
+
                                 btnHint1.setVisibility(View.VISIBLE);
                                 btnHint2.setVisibility(View.VISIBLE);
                                 btnHint3.setVisibility(View.VISIBLE);
 
-                                // 💡 리셋 시 단서 창 끄고 원래 기본 텍스트창 복구
                                 layoutClueContainer.setVisibility(View.GONE);
+                                layoutMainGame.setVisibility(View.VISIBLE);
                                 txtHint.setVisibility(View.VISIBLE);
-                                resetTxtHintStyle(); // 스타일도 기본으로 복구
+                                resetTxtHintStyle();
 
                                 txtHint.setText("집사의 방 서랍을 수색하세요.");
                                 databaseReference.setValue("START_RED");
@@ -129,12 +166,62 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
             public void onCancelled(DatabaseError databaseError) {}
         });
 
-        robot.speak(TtsRequest.create("집사가 머무는 방입니다. 수색을 진행하세요.", false));
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isFinishing()) {
+                    robot.speak(TtsRequest.create("이곳은 저택에 하인들이 머무는 방입니다. 수색을 진행하세요.", false));
+                }
+            }
+        }, 700);
+    }
+
+    private void initInitialUIState() {
+        btnVoiceStart.setVisibility(View.GONE);
+        layoutHintOptions.setVisibility(View.GONE);
+
+        txtVoiceHintContent.setVisibility(View.VISIBLE);
+        txtVoiceHintContent.setText("AWAITING VOICE");
+
+        layoutClueContainer.setVisibility(View.GONE);
+        layoutMainGame.setVisibility(View.VISIBLE);
+
+        layoutHintOptions.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        btnHint1.setBackgroundColor(android.graphics.Color.parseColor("#251215"));
+        btnHint2.setBackgroundColor(android.graphics.Color.parseColor("#251215"));
+        btnHint3.setBackgroundColor(android.graphics.Color.parseColor("#251215"));
+        btnHint4.setBackgroundColor(android.graphics.Color.parseColor("#251215"));
+
+        layoutRfidPanel.setBackgroundResource(R.drawable.panel_red_border);
+        layoutVoicePanel.setBackgroundResource(R.drawable.panel_red_border);
+
+        txtRfidStatusDashboard.setText("AWAITING TAG");
+        txtRfidStatusDashboard.setTextColor(android.graphics.Color.parseColor("#D4AF37"));
+        if (txtRfidCompleteLabel != null) {
+            txtRfidCompleteLabel.setVisibility(View.GONE);
+        }
+
+        // 🛠️ txtVoiceStatusDashboard 초기값 설정 코드 제거 완료
     }
 
     private void simulateRfidTagged() {
         isRfidVerified = true;
-        txtHint.setText("힌트: 검은 나무의 이름을 기억하라");
+
+        layoutRfidPanel.setBackgroundResource(R.drawable.panel_green_border);
+        txtRfidStatusDashboard.setText("ACCESS GRANTED: CARD AUTHORIZED");
+        txtRfidStatusDashboard.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+
+        if (txtRfidCompleteLabel != null) {
+            txtRfidCompleteLabel.setVisibility(View.VISIBLE);
+            txtRfidCompleteLabel.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+        }
+
+        layoutVoicePanel.setBackgroundResource(R.drawable.panel_yellow_border);
+        // 🛠️ txtVoiceStatusDashboard "AWAITING INPUT" 설정 제거 완료
+
+        txtVoiceHintContent.setVisibility(View.VISIBLE);
+        txtVoiceHintContent.setText("힌트: 검은 나무의 이름을 기억하라");
+
         btnVoiceStart.setVisibility(View.VISIBLE);
         robot.speak(TtsRequest.create("첫 번째 잠금 해제. 음성 인증을 진행하세요.", false));
     }
@@ -143,10 +230,15 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
         btnHint1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                score -= 5;
+                score -= 15;
                 layoutHintOptions.setVisibility(View.GONE);
-                btnHint1.setVisibility(View.GONE); // 💡 [수정] 사용한 힌트1 버튼은 화면에서 제거
-                robot.speak(TtsRequest.create("힌트를 제공합니다. 다시 대답해보세요. [힌트1]", false));
+                btnHint1.setVisibility(View.GONE);
+
+                txtVoiceHintContent.setVisibility(View.VISIBLE);
+                txtVoiceHintContent.setText("🧩 [Level 1 힌트]\n영문 철자가 B L A C K 로 시작합니다.\n(현재 점수: " + score + "점)");
+                btnVoiceStart.setVisibility(View.VISIBLE);
+
+                robot.speak(TtsRequest.create("십오 점이 차감되었습니다. 화면 중앙의 음성 인증창에서 제공된 단서를 확인하고 다시 대답해보세요.", false));
             }
         });
 
@@ -155,18 +247,28 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
             public void onClick(View v) {
                 score -= 10;
                 layoutHintOptions.setVisibility(View.GONE);
-                btnHint2.setVisibility(View.GONE); // 💡 [수정] 사용한 힌트2 버튼은 화면에서 제거
-                robot.speak(TtsRequest.create("힌트를 제공합니다. 다시 대답해보세요. [힌트2]", false));
+                btnHint2.setVisibility(View.GONE);
+
+                txtVoiceHintContent.setVisibility(View.VISIBLE);
+                txtVoiceHintContent.setText("🧩 [Level 2 힌트]\n당신이 탐색 중인 이 저택의 영문 이름은 무엇인가요?\n(현재 점수: " + score + "점)");
+                btnVoiceStart.setVisibility(View.VISIBLE);
+
+                robot.speak(TtsRequest.create("십 점이 차감되었습니다. 화면 중앙의 음성 인증창에서 제공된 단서를 확인하고 다시 대답해보세요.", false));
             }
         });
 
         btnHint3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                score -= 15;
+                score -= 5;
                 layoutHintOptions.setVisibility(View.GONE);
-                btnHint3.setVisibility(View.GONE); // 💡 [수정] 사용한 힌트3 버튼은 화면에서 제거
-                robot.speak(TtsRequest.create("힌트를 제공합니다. 다시 대답해보세요. [힌트3]", false));
+                btnHint3.setVisibility(View.GONE);
+
+                txtVoiceHintContent.setVisibility(View.VISIBLE);
+                txtVoiceHintContent.setText("🧩 [Level 3 힌트]\n영어로 된 두 단어입니다.\n(현재 점수: " + score + "점)");
+                btnVoiceStart.setVisibility(View.VISIBLE);
+
+                robot.speak(TtsRequest.create("오 점이 차감되었습니다. 화면 중앙의 음성 인증창에서 제공된 단서를 확인하고 다시 대답해보세요.", false));
             }
         });
 
@@ -174,39 +276,18 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
             @Override
             public void onClick(View v) {
                 layoutHintOptions.setVisibility(View.GONE);
+
+                txtVoiceHintContent.setVisibility(View.VISIBLE);
+                txtVoiceHintContent.setText("패널티 없이 다시 도전합니다.\n(현재 점수: " + score + "점)");
+                btnVoiceStart.setVisibility(View.VISIBLE);
+
                 robot.speak(TtsRequest.create("힌트 없이 재시도합니다. 다시 말씀해주세요.", false));
             }
         });
     }
 
     @Override
-    public void onTtsStatusChanged(TtsRequest ttsRequest) {
-        if (ttsRequest.getStatus() == TtsRequest.Status.COMPLETED) {
-            final String completedSpeech = ttsRequest.getSpeech();
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (completedSpeech.contains("[힌트1]")) {
-                        txtHint.setText("영어로 된 두 단어입니다.\n(현재 점수: " + score + "점)");
-                        btnVoiceStart.setVisibility(View.VISIBLE);
-                    }
-                    else if (completedSpeech.contains("[힌트2]")) {
-                        txtHint.setText("당신이 있는 이 저택의 이름은?\n(현재 점수: " + score + "점)");
-                        btnVoiceStart.setVisibility(View.VISIBLE);
-                    }
-                    else if (completedSpeech.contains("[힌트3]")) {
-                        txtHint.setText("B L A C K 으로 시작합니다.\n(현재 점수: " + score + "점)");
-                        btnVoiceStart.setVisibility(View.VISIBLE);
-                    }
-                    else if (completedSpeech.contains("힌트 없이 재시도합니다")) {
-                        txtHint.setText("힌트: 검은 나무의 이름을 기억하라\n(현재 점수: " + score + "점)");
-                        btnVoiceStart.setVisibility(View.VISIBLE);
-                    }
-                }
-            });
-        }
-    }
+    public void onTtsStatusChanged(TtsRequest ttsRequest) {}
 
     @Override
     public void onAsrResult(String asrResult) {
@@ -214,104 +295,128 @@ public class Mission5 extends AppCompatActivity implements Robot.TtsListener, Ro
             return;
         }
 
+        robot.finishConversation();
+
         final String userInput = asrResult;
 
-        if (userInput.contains("블랙 우드") || userInput.contains("블랙우드")) {
-            // 💡 정답 시 기존 안내 텍스트뷰 및 조작 UI 숨김
-            txtHint.setVisibility(View.GONE);
-            layoutHintOptions.setVisibility(View.GONE);
-            btnVoiceStart.setVisibility(View.GONE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (userInput.contains("블랙 우드") || userInput.contains("블랙우드") || userInput.toLowerCase().contains("blackwood")) {
 
-            // 💡 단서 전용 레이아웃 켜기
-            layoutClueContainer.setVisibility(View.VISIBLE);
+                    layoutMainGame.setVisibility(View.GONE);
+                    txtHint.setVisibility(View.GONE);
+                    layoutHintOptions.setVisibility(View.GONE);
+                    btnVoiceStart.setVisibility(View.GONE);
+                    txtVoiceHintContent.setVisibility(View.GONE);
 
-            String clue11 = "━━━━━━━━━━━━━━━━━━━━━━\n" +
-                    " 📜 [제 11 단서] 검은 점이 묻은 장갑 & 개인 가계부\n" +
-                    "━━━━━━━━━━━━━━━━━━━━━━\n" +
-                    "하인숙소 쓰레기통에서 찢어진 장갑 손목 부분이 발견되었다.\n" +
-                    "장갑 손목 부분에는 작은 검은 잉크 점이 묻어 있었다.\n" +
-                    "이 숙소는 보통 강병철 집사나 정원사 등이 사용한다고 한다.\n" +
-                    "같은 방 책상 서랍에서는 이름이 찢긴 개인 가계부가 발견되었다.\n" +
-                    "가계부의 일부 항목 옆에도 작은 검은 점 표시가 장부의 흔적과 정확히 일치했다.\n";
+                    layoutClueContainer.setVisibility(View.VISIBLE);
 
-            String clue12 = "\n━━━━━━━━━━━━━━━━━━━━━━\n" +
-                    " 📜 [제 12 단서] 회중시계 보증서 & S-2 열쇠\n" +
-                    "━━━━━━━━━━━━━━━━━━━━━━\n" +
-                    "하인숙소 침대 밑 상자에서 오래된 J브랜드 회중시계 보증서가 발견되었다.\n" +
-                    "보증서에는 다음 문장이 적혀 있었다.\n" +
-                    "“1986년, 블랙우드 저택에 들어온 것을 축하하며. 앞으로도 이 집을 부탁하네. — 윤태성”\n" +
-                    "수령인 이름 첫 글자는 희미하게 강으로 보였다.\n" +
-                    "같은 상자 안쪽에서는 서재 옆 보조문 열쇠인 S-2 열쇠도 함께 발견되었다.";
+                    String clue11 = "=============================\n" +
+                            " 📜 [제 11 단서] 검은 장갑 & 가계부\n" +
+                            "=============================\n" +
+                            "하인숙소 쓰레기통에서 찢어진 장갑 손목 부분이 발견되었다.\n" +
+                            "장갑 손목 부분에는 작은 검은 잉크 점이 묻어 있었다.\n" +
+                            "이 숙소는 보통 강병철 집사나 정원사 등이 사용한다고 한다.\n" +
+                            "같은 방 책상 서랍에서는 이름이 찢긴 개인 가계부가 발견되었다.\n" +
+                            "가계부의 일부 항목 옆에도 작은 검은 점 표시가 장부의 흔적과 정확히 일치했다.\n";
 
-            String ttsMessage = "";
+                    String clue12 = "==============================\n" +
+                            " 📜 [제 12 단서] 회중시계 보증서 & 열쇠\n" +
+                            "==============================\n" +
+                            "하인숙소 침대 밑 상자에서 오래된 J브랜드 회중시계 보증서가 발견되었다.\n" +
+                            "보증서에는 다음 문장이 적혀 있었다.\n" +
+                            "“1986년, 블랙우드 저택에 들어온 것을 축하하며. 앞으로도 이 집을 부탁하네. — 윤태성”\n" +
+                            "수령인 이름 첫 글자는 희미하게 강으로 보였다.\n" +
+                            "같은 상자 안쪽에서는 서재 옆 보조문 열쇠인 S-2 열쇠도 함께 발견되었다.";
 
-            // 💡 [조건 분기] 획득 점수(힌트 사용 여부)에 따른 분할 연출
-            if (score == 100) {
-                // ⭐ 단서 2개 전부 획득 -> 좌우 2분할 (1:1 비율)
-                ttsMessage = "음성 인증 성공. 힌트를 사용하지 않아 두 가지 단서를 모두 제공합니다. 화면에서 단서를 확인하세요.";
-                robot.speak(TtsRequest.create(ttsMessage, false));
+                    final String ttsMessage;
 
-                // 왼쪽 단서 종이 세팅
-                txtClueLeft.setVisibility(View.VISIBLE);
-                setPaperStyle(txtClueLeft);
-                LinearLayout.LayoutParams lpLeft = (LinearLayout.LayoutParams) txtClueLeft.getLayoutParams();
-                lpLeft.weight = 1f; // 가로 지분 1
-                txtClueLeft.setLayoutParams(lpLeft);
-                txtClueLeft.setText(clue11);
+                    if (score == 100) {
+                        ttsMessage = "음성 인증 성공. 힌트를 사용하지 않아 두 가지 단서를 모두 제공합니다. 화면에서 단서를 확인하세요.";
+                        txtClueLeft.setVisibility(View.VISIBLE);
+                        setPaperStyle(txtClueLeft);
+                        LinearLayout.LayoutParams lpLeft = (LinearLayout.LayoutParams) txtClueLeft.getLayoutParams();
+                        lpLeft.weight = 1f;
+                        txtClueLeft.setLayoutParams(lpLeft);
+                        txtClueLeft.setText(clue11);
+                        MissionStorage.acquireClue(Mission5.this, 11);
 
-                // 오른쪽 단서 종이 세팅
-                txtClueRight.setVisibility(View.VISIBLE);
-                setPaperStyle(txtClueRight);
-                LinearLayout.LayoutParams lpRight = (LinearLayout.LayoutParams) txtClueRight.getLayoutParams();
-                lpRight.weight = 1f; // 가로 지분 1
-                txtClueRight.setLayoutParams(lpRight);
-                txtClueRight.setText(clue12);
+                        txtClueRight.setVisibility(View.VISIBLE);
+                        setPaperStyle(txtClueRight);
+                        LinearLayout.LayoutParams lpRight = (LinearLayout.LayoutParams) txtClueRight.getLayoutParams();
+                        lpRight.weight = 1f;
+                        txtClueRight.setLayoutParams(lpRight);
+                        txtClueRight.setText(clue12);
+                        MissionStorage.acquireClue(Mission5.this, 12);
 
-            } else {
-                // ⭐ 단서 1개만 획득 -> 왼쪽 창이 꽉 차게 중앙 1분할 정렬
-                ttsMessage = "음성 인증 성공. 힌트를 사용하여 한가지 단서만 제공합니다. 화면에서 단서를 확인하세요.";
-                robot.speak(TtsRequest.create(ttsMessage, false));
+                    } else {
+                        ttsMessage = "음성 인증 성공. 힌트를 사용하여 한가지 단서만 제공합니다. 화면에서 단서를 확인하세요.";
+                        txtClueLeft.setVisibility(View.VISIBLE);
+                        setPaperStyle(txtClueLeft);
+                        LinearLayout.LayoutParams lpLeft = (LinearLayout.LayoutParams) txtClueLeft.getLayoutParams();
+                        lpLeft.weight = 2f;
+                        txtClueLeft.setLayoutParams(lpLeft);
+                        txtClueLeft.setText(clue11);
+                        MissionStorage.acquireClue(Mission5.this, 11);
 
-                // 왼쪽 단서 종이를 화면 전체(weight=2f)로 늘림
-                txtClueLeft.setVisibility(View.VISIBLE);
-                setPaperStyle(txtClueLeft);
-                LinearLayout.LayoutParams lpLeft = (LinearLayout.LayoutParams) txtClueLeft.getLayoutParams();
-                lpLeft.weight = 2f; // 전체 지분 독점
-                txtClueLeft.setLayoutParams(lpLeft);
-                txtClueLeft.setText(clue11);
+                        txtClueRight.setVisibility(View.GONE);
+                    }
 
-                // 오른쪽 단서 종이는 숨김
-                txtClueRight.setVisibility(View.GONE);
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!isFinishing()) {
+                                robot.speak(TtsRequest.create(ttsMessage, false));
+                            }
+                        }
+                    }, 250);
+
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            databaseReference.setValue("VOICE_GREEN_OPEN");
+                        }
+                    }, 1500);
+
+                } else {
+                    robot.speak(TtsRequest.create("음성 인증에 실패했습니다. 화면 우측에서 힌트를 선택하고, 중앙의 음성 인증창에서 암호 단서를 확인하세요.", false));
+
+                    txtVoiceHintContent.setVisibility(View.VISIBLE);
+                    txtVoiceHintContent.setText("❌ 인증 실패! 우측에서 힌트를 고르세요.\n(현재 점수: " + score + "점)");
+
+                    layoutVoicePanel.setBackgroundResource(R.drawable.panel_red_border);
+
+                    // 🛠️ txtVoiceStatusDashboard 인증 실패 텍스트 및 컬러 변경 코드 제거 완료
+
+                    layoutHintOptions.setVisibility(View.VISIBLE);
+                    layoutHintOptions.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+
+                    btnHint1.setBackgroundColor(android.graphics.Color.parseColor("#251215"));
+                    btnHint2.setBackgroundColor(android.graphics.Color.parseColor("#251215"));
+                    btnHint3.setBackgroundColor(android.graphics.Color.parseColor("#251215"));
+                    btnHint4.setBackgroundColor(android.graphics.Color.parseColor("#251215"));
+
+                    btnVoiceStart.setVisibility(View.GONE);
+                }
             }
-
-            databaseReference.setValue("VOICE_GREEN_OPEN");
-
-        } else {
-            // 오답 시에는 갈색 종이 스타일 없이 원래의 기존 스타일 유지
-            robot.speak(TtsRequest.create("인증에 실패했습니다. 화면에서 힌트를 선택하세요.", false));
-            txtHint.setText("인증 실패! (현재 점수: " + score + "점)");
-
-            layoutHintOptions.setVisibility(View.VISIBLE);
-            btnVoiceStart.setVisibility(View.GONE);
-        }
+        });
     }
 
-    // 💡 [단서 화면 전용] 갈색 종이 스타일을 입히는 함수
     private void setPaperStyle(TextView textView) {
         textView.setTextSize(22);
         textView.setPadding(40, 40, 40, 40);
         textView.setGravity(android.view.Gravity.LEFT | android.view.Gravity.TOP);
-        textView.setBackgroundResource(R.drawable.clue_paper_border); // 갈색 테두리 배경 장착
-        textView.setTextColor(android.graphics.Color.parseColor("#2D1B18")); // 진갈색 에스프레소 텍스트
+        textView.setBackgroundResource(R.drawable.clue_paper_border);
+        textView.setTextColor(android.graphics.Color.parseColor("#2D1B18"));
     }
 
-    // [리셋용] txtHint의 텍스트뷰 스타일을 초기 기본 상태로 돌려놓는 함수
     private void resetTxtHintStyle() {
-        txtHint.setTextSize(28); // 혹은 원래 XML에 지정되어 있던 사이즈
-        txtHint.setGravity(android.view.Gravity.CENTER);
+        txtHint.setTextSize(20);
+        txtHint.setGravity(android.view.Gravity.LEFT | android.view.Gravity.TOP);
         txtHint.setPadding(0, 0, 0, 0);
         txtHint.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-        txtHint.setTextColor(android.graphics.Color.parseColor("#3E2723")); // 기존 텍스트 색상
+        txtHint.setTextColor(android.graphics.Color.parseColor("#E3DCCB"));
     }
 
     @Override

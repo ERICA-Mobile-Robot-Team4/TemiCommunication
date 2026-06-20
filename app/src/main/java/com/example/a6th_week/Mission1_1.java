@@ -29,6 +29,7 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
     TextView textTimer;
     TextView textStatus;
     TextView textResult;
+    TextView btnBack;
 
     DatabaseReference missionStartRef;
     DatabaseReference ledStatusRef;
@@ -53,10 +54,23 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
         textTimer = findViewById(R.id.textTimer);
         textStatus = findViewById(R.id.textStatus);
         textResult = findViewById(R.id.textResult);
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+//            if (timer != null) {
+//                timer.cancel();
+//            }
+//
+//            handler.removeCallbacksAndMessages(null);
+//            removeFirebaseListeners();
+//
+//            Intent intent = new Intent(Mission3.this, MainActivity.class);
+//            startActivity(intent);
+            finish();
+        });
 
-        missionStartRef = FirebaseDatabase.getInstance().getReference("missionstart1_1");
-        ledStatusRef = FirebaseDatabase.getInstance().getReference("mission1_1");
-        resultRef = FirebaseDatabase.getInstance().getReference("missionresult1_1");
+        missionStartRef = FirebaseDatabase.getInstance("https://temi-team4-default-rtdb.firebaseio.com").getReference("missionstart1_1");
+        ledStatusRef = FirebaseDatabase.getInstance("https://temi-team4-default-rtdb.firebaseio.com").getReference("mission1_1");
+        resultRef = FirebaseDatabase.getInstance("https://temi-team4-default-rtdb.firebaseio.com").getReference("missionresult1_1");
 
         textStatus.setText("단서 순서 미션을 시작합니다.");
         textResult.setText("");

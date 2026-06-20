@@ -23,6 +23,8 @@ public class Mission1 extends AppCompatActivity {
     Button btnMission1_2;
     Button btnMission1_3;
     Button btnMission1_4;
+    TextView btnBack;
+    LinearLayout btnClue;
 
     TextView textTotalScore;
     LinearLayout layoutMissionContent;
@@ -43,6 +45,7 @@ public class Mission1 extends AppCompatActivity {
         btnMission1_2 = findViewById(R.id.btnMission1_2);
         btnMission1_3 = findViewById(R.id.btnMission1_3);
         btnMission1_4 = findViewById(R.id.btnMission1_4);
+        btnBack = findViewById(R.id.btnBack);
 
         textTotalScore = findViewById(R.id.textTotalScore);
         layoutMissionContent = findViewById(R.id.layoutMissionContent);
@@ -51,7 +54,25 @@ public class Mission1 extends AppCompatActivity {
         txtClueRight = findViewById(R.id.txtClueRight);
         txtClueBottom = findViewById(R.id.txtClueBottom);
 
+        btnClue = findViewById(R.id.btnClue);
+        btnClue.setOnClickListener(v -> {
+            Intent intent = new Intent(Mission1.this, ClueActivity.class);
+            startActivity(intent);
+        });
+
         layoutClueContainer.setVisibility(View.GONE);
+        btnBack.setOnClickListener(v -> {
+//            if (timer != null) {
+//                timer.cancel();
+//            }
+//
+//            handler.removeCallbacksAndMessages(null);
+//            removeFirebaseListeners();
+//
+//            Intent intent = new Intent(Mission3.this, MainActivity.class);
+//            startActivity(intent);
+            finish();
+        });
 
         speak("현재 공간은 서재입니다. 지금부터 현장 감식을 시작합니다. 총 4개의 미션을 수행하게 됩니다.");
 
@@ -172,18 +193,24 @@ public class Mission1 extends AppCompatActivity {
                 mission1_4_completed) {
             layoutMissionContent.setVisibility(View.GONE);
             layoutClueContainer.setVisibility(View.VISIBLE);
-            String clue1 = "📜 [단서 1] 촛대 손잡이의 섬유\n\n" +
+            String clue1 = "=============================\n" +
+                    "📜 [제 1단서] 촛대 손잡이의 섬유\n" +
+                    "=============================\n" +
                     "흉기로 추정되는 촛대 손잡이에서 미세한 면 섬유가 발견되었다.\n" +
                     "지문은 거의 남아 있지 않았고, 손잡이 아래쪽에는 강한 압력 자국이 몰려 있었다.\n" +
                     "섬유는 일반 면장갑 또는 작업용 장갑에서 떨어진 것으로 보인다.";
 
-            String clue2 = "📜 [단서 2] 조작된 창문 발자국\n\n" +
+            String clue2 = "=============================\n" +
+                    "📜 [제 2단서] 조작된 창문 발자국\n" +
+                    "=============================\n" +
                     "서재 창문 밖 흙 위에 발자국이 남아 있었다.\n" +
                     "하지만 발자국 깊이가 일정하지 않고, 발끝 부분만 유난히 선명했다.\n" +
                     "실제 사람이 뛰어내린 흔적이라기보다는 신발을 손으로 눌러 찍은 흔적에 가까웠다.\n" +
                     "창문틀 안쪽에는 흙먼지가 거의 없었다.";
 
-            String clue3 = "📜 [단서 3] 깨진 회중시계\n\n" +
+            String clue3 = "=============================\n" +
+                    "📜 [제 3단서] 깨진 회중시계\n" +
+                    "=============================\n" +
                     "피해자의 책상 아래에서 오래된 회중시계가 발견되었다.\n" +
                     "시계는 22시 37분에서 멈춰 있었다.\n" +
                     "뒷면에는 흐릿하게 J처럼 보이는 이니셜이 새겨져 있었다.\n" +
@@ -195,12 +222,18 @@ public class Mission1 extends AppCompatActivity {
             if (totalScore >= 55) {
                 clueMessage = "총점 " + totalScore + "점입니다. 단서 1, 2, 3을 획득했습니다.";
                 showClues(clue1, clue2, clue3);
+                MissionStorage.acquireClue(this, 1);
+                MissionStorage.acquireClue(this, 2);
+                MissionStorage.acquireClue(this, 3);
             } else if (totalScore >= 35) {
                 clueMessage = "총점 " + totalScore + "점입니다. 단서 1, 2를 획득했습니다.";
                 showClues(clue1, clue2, null);
+                MissionStorage.acquireClue(this, 1);
+                MissionStorage.acquireClue(this, 2);
             } else {
                 clueMessage = "총점 " + totalScore + "점입니다. 단서 1만 획득했습니다.";
                 showClues(clue1, null, null);
+                MissionStorage.acquireClue(this, 1);
             }
 
             prefs.edit()

@@ -4,6 +4,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -21,6 +23,7 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
     private TextView textStep;
     private TextView textScore;
     private TextView textResult;
+    private TextView btnBack;
     //private TextView textPattern;
 
     private Button btnUp;
@@ -51,10 +54,24 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
         textScore = findViewById(R.id.textScore);
         textResult = findViewById(R.id.textResult);
         //textPattern = findViewById(R.id.textPattern);
+        Handler handler = new Handler(Looper.getMainLooper());
 
         btnUp = findViewById(R.id.btnUp);
         btnCenter = findViewById(R.id.btnCenter);
         btnDown = findViewById(R.id.btnDown);
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+//            if (timer != null) {
+//                timer.cancel();
+//            }
+//
+//            handler.removeCallbacksAndMessages(null);
+//            removeFirebaseListeners();
+//
+//            Intent intent = new Intent(Mission3.this, MainActivity.class);
+//            startActivity(intent);
+            finish();
+        });
 
         updateScreen();
 
@@ -64,7 +81,9 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
         btnCenter.setOnClickListener(view -> checkInput("CENTER"));
         btnDown.setOnClickListener(view -> checkInput("DOWN"));
 
-        startTimer();
+        handler.postDelayed(() -> {
+            startTimer();
+        }, 13000);
     }
 
     private void checkInput(String input) {
@@ -138,7 +157,7 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
             @Override
             public void onFinish() {
                 if (!isFinished) {
-                    finishMission(score, "시간 종료. 현재 점수는 " + score + "점입니다.");
+                    finishMission(0, "시간 종료되었습니다. 획득한 점수는 0점입니다.");
                 }
             }
         };

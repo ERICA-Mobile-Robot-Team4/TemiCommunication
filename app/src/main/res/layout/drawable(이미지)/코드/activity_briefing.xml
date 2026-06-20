@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- ── 배경 이미지 ── -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/bg_briefing"
+        android:scaleType="centerCrop" />
+
+    <!-- ── 어두운 오버레이 (글자 가독성 확보) ── -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#BB000000" />
+
+    <!-- ── 실제 콘텐츠 ── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 상단 바 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="#CC1A1008"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp">
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="← 뒤로"
+                android:textColor="#C8A96E"
+                android:textSize="11sp"
+                android:backgroundTint="#33C8A96E"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦ THE MOURNING ESTATE"
+                android:textColor="#C8A96E"
+                android:textSize="14sp"
+                android:letterSpacing="0.15"
+                android:fontFamily="serif" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  /  사건 브리핑"
+                android:textColor="#AAAAAA"
+                android:textSize="13sp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TEMI 시스템 음성"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:background="#8B0000"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp" />
+        </LinearLayout>
+
+        <!-- 바디 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <!-- 좌측: 사건 개요 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:orientation="vertical"
+                android:padding="40dp"
+                android:justificationMode="inter_word">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2026년 4월, 100년 역사의 명문 가문 블랙우드 저택."
+                    android:textColor="#EEEEEE"
+                    android:textSize="18sp"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginBottom="24dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="가문의 가장이자 대기업 블랙우드 그룹의 회장 윤태성(68세)이"
+                    android:textColor="#EEEEEE"
+                    android:textSize="18sp"
+                    android:lineSpacingMultiplier="1.6" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="저택 내 서재에서 뒤통수에 둔기를 맞아 숨진 채 발견되었습니다."
+                    android:textColor="#EEEEEE"
+                    android:textSize="18sp"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginBottom="36dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="사건 당일 저녁, 유언장 공개를 위한 가족 만찬이 열렸고,"
+                    android:textColor="#EEEEEE"
+                    android:textSize="18sp"
+                    android:lineSpacingMultiplier="1.6" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="만찬 후 회장이 서재로 들어간 것을 마지막으로"
+                    android:textColor="#EEEEEE"
+                    android:textSize="18sp"
+                    android:lineSpacingMultiplier="1.6" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="그 누구도 그를 보지 못했습니다."
+                    android:textColor="#EEEEEE"
+                    android:textSize="18sp"
+                    android:lineSpacingMultiplier="1.6"
+                    android:layout_marginBottom="36dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="현장에는 피 묻은 촛대, 개봉된 유언장 봉투,"
+                    android:textColor="#EEEEEE"
+                    android:textSize="18sp"
+                    android:lineSpacingMultiplier="1.6" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="창문 너머 발자국, 깨진 시계 등이 남아 있었습니다."
+                    android:textColor="#EEEEEE"
+                    android:textSize="18sp"
+                    android:lineSpacingMultiplier="1.6" />
+
+            </LinearLayout>
+
+            <!-- 우측: 현장 증거물 패널 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical"
+                android:background="#CC111111"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="현장 증거물"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 증거 카드 1 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#331A1A1A"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="피 묻은 촛대"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="벽난로 옆 발견"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- 증거 카드 2 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#331A1A1A"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="개봉된 유언장"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="책상 위"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- 증거 카드 3 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#331A1A1A"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="창문 너머 발자국"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="외부 흙 위"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- 증거 카드 4 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#331A1A1A"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:layout_marginBottom="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="깨진 회중시계"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="22:37 멈춤"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- 증거 카드 5 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#553D1A1A"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="용의자 6인 독점"
+                        android:textColor="#C8A96E"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="만찬 당일 저택에 있었던 모든 인물이\n용의자로 지목되었습니다."
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 하단: 장소 이동 버튼 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="#CC0A0A0A"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnNext"
+                android:layout_width="240dp"
+                android:layout_height="52dp"
+                android:text="장소  이동  →"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:letterSpacing="0.15"
+                android:background="@drawable/btn_mission_outline" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

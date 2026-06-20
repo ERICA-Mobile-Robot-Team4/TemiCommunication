@@ -1,123 +1,351 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#0F1218">
 
-    <!-- 미션 선택 화면 -->
     <LinearLayout
-        android:id="@+id/layoutMissionContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="30dp"
-        android:gravity="center_horizontal">
+        android:background="#0B0E14"
+        android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🕵️ Mission 1"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="40dp" />
-
-        <Button
-            android:id="@+id/btnMission1_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mission 1-1"
-            android:textSize="20sp"
-            android:layout_marginBottom="15dp" />
-
-        <Button
-            android:id="@+id/btnMission1_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mission 1-2"
-            android:textSize="20sp"
-            android:layout_marginBottom="15dp" />
-
-        <Button
-            android:id="@+id/btnMission1_3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mission 1-3"
-            android:textSize="20sp"
-            android:layout_marginBottom="15dp" />
-
-        <Button
-            android:id="@+id/btnMission1_4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mission 1-4"
-            android:textSize="20sp"
-            android:layout_marginBottom="25dp" />
-
-        <TextView
-            android:id="@+id/textTotalScore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mission1 총 점수 : 0"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <!-- 단서 전용 화면 -->
-    <LinearLayout
-        android:id="@+id/layoutClueContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:background="#EFEBE9"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/textClueTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📜 획득한 단서"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:textColor="#2D1B18"
-            android:layout_marginBottom="16dp" />
-
-        <!-- 위쪽 단서 1, 2 -->
+        <!-- LEFT SIDEBAR: Mission3 스타일 -->
         <LinearLayout
-            android:id="@+id/layoutClueTop"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:background="#131722"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="30dp"
+            android:paddingBottom="20dp">
 
             <TextView
-                android:id="@+id/txtClueLeft"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="8dp"
-                android:scrollbars="vertical"
-                android:visibility="gone" />
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="45dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="≡"
+                android:textColor="#D4AF37"
+                android:textSize="26sp" />
 
-            <TextView
-                android:id="@+id/txtClueRight"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="8dp"
-                android:scrollbars="vertical"
-                android:visibility="gone" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="35dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👥"
+                    android:textColor="#566275"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="WHO"
+                    android:textColor="#566275"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="35dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="45dp"
+                    android:background="#D4AF37" />
+
+                <LinearLayout
+                    android:id="@+id/btnClue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📜"
+                        android:textColor="#D4AF37"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="CLUE"
+                        android:textColor="#D4AF37"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="18dp"
+                android:layout_marginEnd="18dp"
+                android:background="#2C3038" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📄"
+                    android:textColor="#566275"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="FILE"
+                    android:textColor="#566275"
+                    android:textSize="11sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- 아래쪽 단서 3 -->
-        <TextView
-            android:id="@+id/txtClueBottom"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+        <!-- CENTER CONTENT: Mission3 상단 스타일 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_margin="8dp"
-            android:scrollbars="vertical"
-            android:visibility="gone" />
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- HEADER -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.05"
+                    android:text="THE MOURNING ESTATE"
+                    android:textColor="#D4AF37"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="32dp"
+                    android:background="#4B1F24"
+                    android:gravity="center"
+                    android:text="● LIVE MONITORING"
+                    android:textColor="#FFD6D1"
+                    android:textSize="9sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 화면 전환 영역 -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="7">
+
+                <!-- 미션 화면 -->
+                <LinearLayout
+                    android:id="@+id/layoutMissionContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#151922"
+                    android:orientation="vertical"
+                    android:padding="22dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:letterSpacing="0.05"
+                        android:text="SCENE 1"
+                        android:textColor="#D4AF37"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="서재"
+                        android:textColor="#FFFFFF"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textTotalScore"
+                        android:layout_width="220dp"
+                        android:layout_height="42dp"
+                        android:layout_marginBottom="24dp"
+                        android:background="#4B1F24"
+                        android:gravity="center"
+                        android:text="Mission1 총 점수 : 0"
+                        android:textColor="#FFD6D1"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/btnMission1_1"
+                            android:layout_width="420dp"
+                            android:layout_height="70dp"
+                            android:layout_marginBottom="16dp"
+                            android:backgroundTint="#1C1E26"
+                            android:text="MISSION 01  |  RFID Sequence"
+                            android:textColor="#F2C84B"
+                            android:textSize="15sp" />
+
+                        <Button
+                            android:id="@+id/btnMission1_2"
+                            android:layout_width="420dp"
+                            android:layout_height="70dp"
+                            android:layout_marginBottom="16dp"
+                            android:backgroundTint="#1C1E26"
+                            android:text="MISSION 02  |  RGB Spectrum"
+                            android:textColor="#F2C84B"
+                            android:textSize="15sp" />
+
+                        <Button
+                            android:id="@+id/btnMission1_3"
+                            android:layout_width="420dp"
+                            android:layout_height="70dp"
+                            android:layout_marginBottom="16dp"
+                            android:backgroundTint="#1C1E26"
+                            android:text="MISSION 03  |  Axial Scanner"
+                            android:textColor="#F2C84B"
+                            android:textSize="15sp" />
+
+                        <Button
+                            android:id="@+id/btnMission1_4"
+                            android:layout_width="420dp"
+                            android:layout_height="70dp"
+                            android:backgroundTint="#1C1E26"
+                            android:text="MISSION 04  |  Analysis"
+                            android:textColor="#F2C84B"
+                            android:textSize="15sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- 단서 화면 -->
+                <LinearLayout
+                    android:id="@+id/layoutClueContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#0B0E14"
+                    android:orientation="vertical"
+                    android:padding="22dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/textClueTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="감식 결과 목록"
+                        android:textColor="#F2C84B"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutClueTop"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="22dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/txtClueLeft"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:background="#151922"
+                            android:padding="22dp"
+                            android:textColor="#D8D2C2"
+                            android:textSize="15sp"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/txtClueRight"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:background="#151922"
+                            android:padding="22dp"
+                            android:textColor="#D8D2C2"
+                            android:textSize="15sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtClueBottom"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_weight="1"
+                        android:background="#151922"
+                        android:padding="22dp"
+                        android:textColor="#D8D2C2"
+                        android:textSize="15sp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+            <!-- FOOTER -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center_vertical"
+                android:text="REF: LIBRARY-STUDY-01        SYSTEM ONLINE        VER. 4.2.0"
+                android:textColor="#5A4A36"
+                android:textSize="9sp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

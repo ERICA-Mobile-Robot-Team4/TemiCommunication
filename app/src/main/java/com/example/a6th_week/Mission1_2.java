@@ -27,6 +27,7 @@ public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListene
     TextView textStatus;
     TextView textScore;
     TextView textResult;
+    TextView btnBack;
 
     DatabaseReference missionRef;
     DatabaseReference missionStartRef;
@@ -49,9 +50,22 @@ public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListene
         textStatus = findViewById(R.id.textStatus);
         textScore = findViewById(R.id.textScore);
         textResult = findViewById(R.id.textResult);
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+//            if (timer != null) {
+//                timer.cancel();
+//            }
+//
+//            handler.removeCallbacksAndMessages(null);
+//            removeFirebaseListeners();
+//
+//            Intent intent = new Intent(Mission3.this, MainActivity.class);
+//            startActivity(intent);
+            finish();
+        });
 
-        missionRef = FirebaseDatabase.getInstance().getReference("missionresult1_2");
-        missionStartRef = FirebaseDatabase.getInstance().getReference("missionstart1_2");
+        missionRef = FirebaseDatabase.getInstance("https://temi-team4-default-rtdb.firebaseio.com").getReference("missionresult1_2");
+        missionStartRef = FirebaseDatabase.getInstance("https://temi-team4-default-rtdb.firebaseio.com").getReference("missionstart1_2");
 
         missionStartRef.setValue(0);
         missionRef.setValue(-1);

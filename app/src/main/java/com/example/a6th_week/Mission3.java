@@ -1,5 +1,6 @@
 package com.example.a6th_week;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -28,13 +29,17 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
     Robot robot;
 
     CountDownTimer timer;
+
     TextView textTimer;
     TextView textStatus;
     TextView textStep1;
     TextView textStep2;
     TextView textResult;
+    TextView btnBack;
+    LinearLayout btnClue;
 
     LinearLayout layoutMissionContent;
+    LinearLayout layoutMissionPanel;
     LinearLayout layoutClueContainer;
 
     TextView txtClueLeft;
@@ -73,14 +78,16 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
         setContentView(R.layout.activity_mission3);
 
         robot = Robot.getInstance();
+
         textTimer = findViewById(R.id.textTimer);
         textStatus = findViewById(R.id.textStatus);
         textStep1 = findViewById(R.id.textStep1);
         textStep2 = findViewById(R.id.textStep2);
         textResult = findViewById(R.id.textResult);
-
+        btnBack = findViewById(R.id.btnBack);
 
         layoutMissionContent = findViewById(R.id.layoutMissionContent);
+        layoutMissionPanel = findViewById(R.id.layoutMissionPanel);
         layoutClueContainer = findViewById(R.id.layoutClueContainer);
 
         txtClueLeft = findViewById(R.id.txtClueLeft);
@@ -88,10 +95,29 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
         txtClueBottom = findViewById(R.id.txtClueBottom);
 
         layoutMissionContent.setVisibility(View.VISIBLE);
+        layoutMissionPanel.setVisibility(View.VISIBLE);
         layoutClueContainer.setVisibility(View.GONE);
 
+        btnBack.setOnClickListener(v -> {
+//            if (timer != null) {
+//                timer.cancel();
+//            }
+//
+//            handler.removeCallbacksAndMessages(null);
+//            removeFirebaseListeners();
+//
+//            Intent intent = new Intent(Mission3.this, MainActivity.class);
+//            startActivity(intent);
+            finish();
+        });
+        btnClue = findViewById(R.id.btnClue);
+        btnClue.setOnClickListener(v -> {
+            Intent intent = new Intent(Mission3.this, ClueActivity.class);
+            startActivity(intent);
+        });
+
         FirebaseDatabase database =
-                FirebaseDatabase.getInstance();
+                FirebaseDatabase.getInstance("https://temi-team4-default-rtdb.firebaseio.com");
 
         missionStart3_1_1Ref = database.getReference("missionstart3_1_1");
         missionEnd3_1_1Ref = database.getReference("missionend3_1_1");
@@ -108,20 +134,12 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
         textStatus.setText("혈흔 희석 흔적 재현 미션");
         textStep1.setText("1단계: 수위 조절");
         textStep2.setText("2단계: 농도 조절");
-        // textResult.setText("최종 결과 : 대기 중");
 
         speak("사건 당일 밤 이 주방 싱크대에서 혈흔이 발견되었습니다. " +
                 "누군가 혈흔을 물로 희석하여 증거를 지우려 한 것으로 보입니다. " +
                 "당시 희석 과정을 재현하여 흔적을 분석해봅시다.");
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startStep1();
-            }
-        }, 15000);
-
-
+        handler.postDelayed(() -> startStep1(), 15000);
     }
 
     private void resetMissionValues() {
@@ -139,19 +157,17 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
     private void startStep1() {
         if (isFinished) return;
 
-//        textStep1.setText("1단계 : 진행 중");
-//        textStatus.setText("1단계 미션 진행 중");
-
         speak("1단계 미션 시작하겠습니다. " +
                 "사건 당시 사용된 컵의 물 사용량을 재현합니다. " +
                 "컵에 담긴 물을 약 30%만 남기고 버려주십시오. " +
                 "10초 후 자동 측정이 진행됩니다.");
-        // 딜레이?
-        startTimer(10);
-        listenStep1End();
-        listenStep1Result();
 
-        missionStart3_1_1Ref.setValue(1);
+        handler.postDelayed(() -> {
+            missionStart3_1_1Ref.setValue(1);
+            startTimer(10);
+            //listenStep1End();
+            listenStep1Result();
+        }, 15000);
     }
 
     private void listenStep1End() {
@@ -191,23 +207,12 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
                 if (resultNumber == null) return;
 
                 int result = resultNumber.intValue();
-
                 if (result == -1) return;
 
                 step1Handled = true;
 
                 textStep1.setText("1단계 : " + result);
-                textStatus.setText("1단계 " + result + "획득");
                 speak("1단계에 " + result + "점을 획득했습니다.");
-//                if (result == 1) {
-//                    textStep1.setText("1단계 : 성공");
-//                    textStatus.setText("1단계 성공");
-//                    speak("1단계 미션을 성공하셨습니다.");
-//                } else if (result == 0) {
-//                    textStep1.setText("1단계 : 실패");
-//                    textStatus.setText("1단계 실패");
-//                    speak("1단계 미션을 실패하셨습니다.");
-//                }
 
                 if (missionEnd3_1_1Ref != null && end3_1_1Listener != null) {
                     missionEnd3_1_1Ref.removeEventListener(end3_1_1Listener);
@@ -217,12 +222,7 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
                     missionResult3_1_1Ref.removeEventListener(result3_1_1Listener);
                 }
 
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startStep2();
-                    }
-                }, 4000);
+                handler.postDelayed(() -> startStep2(), 4000);
             }
 
             @Override
@@ -239,19 +239,17 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
 
         step2Started = true;
 
-//        textStep2.setText("2단계 : 농조 조절 중...");
-//        textStatus.setText("2단계 미션 진행 중");
-
         speak("2단계 미션 시작하겠습니다. " +
                 "혈흔이 물에 희석된 정도를 재현합니다. " +
-                "물감을 사용하여 목표 농도에 최대한 가깝게 맞춰주십시오 " +
+                "물감을 사용하여 목표 농도에 최대한 가깝게 맞춰주십시오. " +
                 "제한 시간은 20초입니다.");
 
-        startTimer(20);
-        listenStep2End();
-        listenStep2Result();
-
-        missionStart3_1_2Ref.setValue(1);
+        handler.postDelayed(() -> {
+            missionStart3_1_2Ref.setValue(1);
+            startTimer(20);
+            //listenStep2End();
+            listenStep2Result();
+        }, 15000);
     }
 
     private void listenStep2End() {
@@ -267,7 +265,6 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
 
                 if (value == 1) {
                     textStep2.setText("2단계 : 종료");
-                    textStatus.setText("2단계 종료 신호 수신");
                     speak("2단계 미션이 종료되었습니다.");
                 }
             }
@@ -291,24 +288,12 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
                 if (resultNumber == null) return;
 
                 int result = resultNumber.intValue();
-
                 if (result == -1) return;
 
                 step2Handled = true;
 
                 textStep2.setText("2단계 : " + result);
-                textStatus.setText("2단계 " + result + "획득");
                 speak("2단계에 " + result + "점을 획득했습니다.");
-
-//                if (result == 1) {
-//                    textStep2.setText("2단계 : 성공");
-//                    textStatus.setText("2단계 성공");
-//                    speak("2단계 미션을 성공하셨습니다.");
-//                } else if (result == 0) {
-//                    textStep2.setText("2단계 : 실패");
-//                    textStatus.setText("2단계 실패");
-//                    speak("2단계 미션을 실패하셨습니다.");
-//                }
 
                 if (missionEnd3_1_2Ref != null && end3_1_2Listener != null) {
                     missionEnd3_1_2Ref.removeEventListener(end3_1_2Listener);
@@ -318,7 +303,9 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
                     missionResult3_1_2Ref.removeEventListener(result3_1_2Listener);
                 }
 
-                listenFinalResult();
+                speak("최종 결과를 산출중입니다.");
+
+                handler.postDelayed(() -> listenFinalResult(), 8000);
             }
 
             @Override
@@ -331,6 +318,10 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
     }
 
     private void startTimer(int time) {
+        if (timer != null) {
+            timer.cancel();
+        }
+
         timer = new CountDownTimer(time * 1000L, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -342,7 +333,6 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
             public void onFinish() {
                 if (!isFinished) {
                     textTimer.setText("남은 시간 : 0초");
-                    textStatus.setText("제한 시간이 종료되었습니다.\n최종 점수 결과를 기다리는 중입니다.");
                     speak("제한 시간이 종료되었습니다. 최종 점수 결과를 기다립니다.");
                 }
             }
@@ -364,9 +354,7 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
 
                 if (finalResult == -1) return;
 
-                if (finalResult >= 1 && finalResult <= 4) {
-                    showFinalResult(finalResult);
-                }
+                showFinalResult(finalResult);
             }
 
             @Override
@@ -381,9 +369,18 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
     private void showFinalResult(int finalResult) {
         isFinished = true;
 
+        if (timer != null) {
+            timer.cancel();
+        }
+
         removeFirebaseListeners();
 
-        layoutMissionContent.setVisibility(View.GONE);
+        if (finalResult < 40) {
+            speak("최종 점수가 40점 미만이라서 단서 획득에 실패하셨습니다");
+            return;
+        }
+
+        layoutMissionPanel.setVisibility(View.GONE);
         layoutClueContainer.setVisibility(View.VISIBLE);
 
         String finalMessage = "분석 완료. 최종 결과는 " + finalResult + "입니다.";
@@ -393,19 +390,25 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
             finalResultSpoken = true;
         }
 
-        String clue1 = "📜 [단서 6] 비어있는 설거지 기록\n\n" +
+        String clue1 = "=============================\n" +
+                "📜 [제 6단서] 비어있는 설거지 기록\n" +
+                "=============================\n" +
                 "주방 작업 일지에는 21시 50분까지 설거지 기록이 남아 있었다.\n" +
                 "그러나 21시 50분부터 23시 10분까지 기록이 비어 있었다.\n" +
                 "싱크대에는 물기가 남아 있었지만, 실제 설거지된 접시 수와 물 사용량이 맞지 않았다\n" +
                 "강병철 집사는 사건 당시 설거지 중이었다는 증언과 일치하지 않는다.\n" +
                 "누군가 강병철 집사를 모함하기 위함일까? 아니면 강병철 집사가 거짓말을 하고 있는 것일까\n";
 
-        String clue2 = "📜 [단서 7] 젖은 면장갑 한 짝\n\n" +
+        String clue2 = "=============================\n" +
+                "📜 [제 7단서] 젖은 면장갑 한 짝\n" +
+                "=============================\n" +
                 "주방 찬장 안쪽에서 젖은 면장갑 한 짝이 발견되었다.\n" +
                 "장갑에서는 세제 냄새와 약한 금속 냄새가 동시에 났다.\n" +
                 "장갑 안쪽에는 이름표가 있었던 흔적이 있지만, 물에 번져 읽을 수 없었다.\n";
 
-        String clue3 = "📜 [단서 8] 주방 뒷문 개폐 기록\n\n" +
+        String clue3 = "=============================\n" +
+                "📜 [제 8단서] 주방 뒷문 개폐 기록\n" +
+                "=============================\n" +
                 "주방 뒷문은 22시 28분에 열렸다가 22시 34분에 다시 잠겼다.\n" +
                 "이 문은 하인 숙소, 지하실, 정원 방향으로 이어진다\n" +
                 "카드키 기록은 없고, 오래된 수동 열쇠로 열린 것으로 보인다.\n" +
@@ -420,18 +423,21 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
             txtClueLeft.setVisibility(View.VISIBLE);
             setPaperStyle(txtClueLeft);
             txtClueLeft.setText(clue1);
+            MissionStorage.acquireClue(this, 6);
         }
 
         if (finalResult >= 60) {
             txtClueRight.setVisibility(View.VISIBLE);
             setPaperStyle(txtClueRight);
             txtClueRight.setText(clue2);
+            MissionStorage.acquireClue(this, 7);
         }
 
         if (finalResult >= 80) {
             txtClueBottom.setVisibility(View.VISIBLE);
             setPaperStyle(txtClueBottom);
             txtClueBottom.setText(clue3);
+            MissionStorage.acquireClue(this, 8);
         }
     }
 
@@ -503,6 +509,10 @@ public class Mission3 extends AppCompatActivity implements OnRobotReadyListener 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if (timer != null) {
+            timer.cancel();
+        }
 
         handler.removeCallbacksAndMessages(null);
         removeFirebaseListeners();
