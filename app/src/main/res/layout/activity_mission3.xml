@@ -223,7 +223,7 @@
                             android:layout_centerInParent="true"
                             android:background="#1C1E26"
                             android:gravity="center"
-                            android:text="남은 시간 : 00초"
+                            android:text="남은 시간 : 30초"
                             android:textColor="#F2C84B"
                             android:textSize="24sp"
                             android:textStyle="bold" />
