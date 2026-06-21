@@ -75,7 +75,11 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
 
         updateScreen();
 
-        speak("책장 스캔 미션을 시작합니다. 위쪽, 정면, 아래쪽, 위쪽, 아래쪽 순서로 시야를 조정하세요.");
+        textResult.postDelayed(() -> {
+            if (robot != null)
+                robot.speak(TtsRequest.create(
+                        "책장 스캔 미션을 시작합니다. 위쪽, 정면, 아래쪽, 위쪽, 아래쪽 순서로 시야를 조정하세요.", false));
+        }, 3000);
 
         btnUp.setOnClickListener(view -> checkInput("UP"));
         btnCenter.setOnClickListener(view -> checkInput("CENTER"));
@@ -202,9 +206,15 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
     @Override
     protected void onStart() {
         super.onStart();
-
         if (robot != null) {
             robot.addOnRobotReadyListener(this);
+            try {
+                ActivityInfo activityInfo = getPackageManager()
+                        .getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+                robot.onStart(activityInfo);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -228,19 +238,5 @@ public class Mission1_3 extends AppCompatActivity implements OnRobotReadyListene
 
     @Override
     public void onRobotReady(boolean isReady) {
-        if (isReady) {
-            try {
-                ActivityInfo activityInfo =
-                        getPackageManager().getActivityInfo(
-                                getComponentName(),
-                                PackageManager.GET_META_DATA
-                        );
-
-                robot.onStart(activityInfo);
-
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

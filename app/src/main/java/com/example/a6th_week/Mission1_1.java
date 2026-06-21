@@ -79,8 +79,11 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
         ledStatusRef.setValue(0);
         resultRef.setValue(-1);
 
-        //speakIntroAndStartMission();
-        speak("혈흔 위치를 탐색합니다. LED가 랜덤으로 15번 점등됩니다. 각 LED가 몇 번 점등되었는지 기억하시길 바랍니다.");
+        textResult.postDelayed(() -> {
+            if (robot != null)
+                robot.speak(TtsRequest.create(
+                        "혈흔 위치를 탐색합니다. LED가 랜덤으로 15번 점등됩니다. 각 LED가 몇 번 점등되었는지 기억하시길 바랍니다.", false));
+        }, 500);
 
         textResult.postDelayed(new Runnable() {
             @Override
@@ -282,10 +285,7 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
     @Override
     protected void onStart() {
         super.onStart();
-
-        if (robot != null) {
-            robot.addOnRobotReadyListener(this);
-        }
+        if (robot != null) robot.addOnRobotReadyListener(this);
     }
 
     @Override
@@ -313,19 +313,13 @@ public class Mission1_1 extends AppCompatActivity implements OnRobotReadyListene
 
     @Override
     public void onRobotReady(boolean isReady) {
-        if (isReady) {
-            try {
-                ActivityInfo activityInfo =
-                        getPackageManager().getActivityInfo(
-                                getComponentName(),
-                                PackageManager.GET_META_DATA
-                        );
-
-                robot.onStart(activityInfo);
-
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
+        if (!isReady || robot == null) return;
+        try {
+            ActivityInfo activityInfo = getPackageManager()
+                    .getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+            robot.onStart(activityInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }

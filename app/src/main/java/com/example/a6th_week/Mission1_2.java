@@ -4,6 +4,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -75,17 +77,16 @@ public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListene
         textScore.setText("최종 점수 대기 중");
         textResult.setText("");
 
+        textResult.postDelayed(() -> {
+            if (robot != null)
+                robot.speak(TtsRequest.create(
+                        "지금부터 3개의 LED 중 랜덤으로 LED가 점등됩니다. LED가 점등되면 해당 색상 카드를 시간 안에 인식시키십시오. 총 10번 진행됩니다.", false));
+        }, 500);
+
         startMissionGuide();
     }
 
     private void startMissionGuide() {
-        String guide =
-                "지금부터 3개의 LED 중 랜덤으로 LED가 점등됩니다. " +
-                        "LED가 점등되면 해당 색상 카드를 시간 안에 인식시키십시오. " +
-                        "총 10번 진행됩니다.";
-
-        speak(guide);
-
         textResult.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -212,10 +213,7 @@ public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListene
     @Override
     protected void onStart() {
         super.onStart();
-
-        if (robot != null) {
-            robot.addOnRobotReadyListener(this);
-        }
+        if (robot != null) robot.addOnRobotReadyListener(this);
     }
 
     @Override
@@ -242,19 +240,13 @@ public class Mission1_2 extends AppCompatActivity implements OnRobotReadyListene
 
     @Override
     public void onRobotReady(boolean isReady) {
-        if (isReady) {
-            try {
-                ActivityInfo activityInfo =
-                        getPackageManager().getActivityInfo(
-                                getComponentName(),
-                                PackageManager.GET_META_DATA
-                        );
-
-                robot.onStart(activityInfo);
-
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
+        if (!isReady || robot == null) return;
+        try {
+            ActivityInfo activityInfo = getPackageManager()
+                    .getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+            robot.onStart(activityInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }

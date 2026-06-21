@@ -17,11 +17,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import com.robotemi.sdk.Robot;
+import com.robotemi.sdk.listeners.OnRobotReadyListener;
 import com.robotemi.sdk.TtsRequest;
 
-public class Mission4 extends AppCompatActivity {
+public class Mission4 extends AppCompatActivity implements OnRobotReadyListener {
 
+    private static boolean introPlayed = false;
     private Robot robot;
     private TextView txtMain;
     private TextView btnBack;
@@ -85,6 +89,10 @@ public class Mission4 extends AppCompatActivity {
             startActivity(intent);
         });
 
+        android.widget.LinearLayout btnWho = findViewById(R.id.btnWho);
+        if (btnWho != null) btnWho.setOnClickListener(v -> showSuspectListDialog());
+
+
         // 다시보기 버튼 매핑 (평소에는 감춰둠)
         btnShowDiary = findViewById(R.id.btnShowDiary);
         if (btnShowDiary != null) {
@@ -104,15 +112,7 @@ public class Mission4 extends AppCompatActivity {
         // 첫 진입 시 일지 출력 및 스타일 빌드
         setPaperStyle(txtMain);
 
-        // UI 렌더링 마진 후 음성 출력
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!isFinishing() && robot != null) {
-                    robot.speak(TtsRequest.create("저택 지하입니다. 회장과 집사가 작성한 이 저택의 재정 기록이 남아있습니다. 뭔가 숨겨둔 게 있지 않을까요?", false));
-                }
-            }
-        }, 700);
+        // TTS는 onRobotReady에서 한 번만 처리
 
         // 숫자 버튼(0~9) 리스너 세팅
         int[] resIds = {
@@ -163,7 +163,7 @@ public class Mission4 extends AppCompatActivity {
         }
 
         // 파이어베이스 데이터베이스 통신 셋업
-        firebaseDatabase = FirebaseDatabase.getInstance("https://temicommunication-ffc22-default-rtdb.shadow.com");
+        firebaseDatabase = FirebaseDatabase.getInstance("https://temicommunication-ffc22-default-rtdb.firebaseio.com");
         databaseReference = firebaseDatabase.getReference("temi_command");
         databaseReference.setValue("START_BASEMENT");
 
@@ -346,5 +346,109 @@ public class Mission4 extends AppCompatActivity {
         textView.setGravity(android.view.Gravity.LEFT | android.view.Gravity.TOP);
         textView.setBackgroundResource(R.drawable.clue_paper_border);
         textView.setTextColor(android.graphics.Color.parseColor("#2D1B18"));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (robot != null) robot.addOnRobotReadyListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (robot != null) {
+            robot.removeOnRobotReadyListener(this);
+            robot.cancelAllTtsRequests();
+        }
+    }
+
+    @Override
+    public void onRobotReady(boolean isReady) {
+        if (!isReady || robot == null) return;
+        try {
+            ActivityInfo info = getPackageManager()
+                    .getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+            robot.onStart(info);
+            if (!introPlayed) {
+                introPlayed = true;
+                robot.speak(com.robotemi.sdk.TtsRequest.create("저택 지하입니다. 회장과 집사가 작성한 이 저택의 재정 기록이 남아있습니다.", false));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ── 용의자 목록 팝업 ──────────────────────────────────────
+    private void showSuspectListDialog() {
+        android.widget.ScrollView scrollView = new android.widget.ScrollView(this);
+        android.widget.LinearLayout list = new android.widget.LinearLayout(this);
+        list.setOrientation(android.widget.LinearLayout.VERTICAL);
+        list.setBackgroundColor(android.graphics.Color.parseColor("#1A1A2E"));
+        list.setPadding(0, 8, 0, 8);
+
+        String[][] suspects = {
+            {"강병철", "집사 · 58세", "주방 설거지", "횡령 사실 발각 위기", "kang_byung_chul"},
+            {"윤재호", "장남 · 42세", "2층 방 취침", "유언장 경영권 박탈", "yoon_jae_ho"},
+            {"윤수아", "장녀 · 38세", "응접실 독서", "해외 사업 자금 거부", "yoon_su_a"},
+            {"박미경", "재혼 배우자 · 45세", "침실 수면", "이혼 요구 갈등", "park_mi_kyung"},
+            {"이준혁", "주치의 · 51세", "22시 귀가", "불법 처방 발각 위기", "lee_jun_hyuk"},
+            {"오달수", "정원사 · 62세", "창고 정리", "저택 매각 시 실직", "oh_dal_su"},
+        };
+
+        for (String[] s : suspects) {
+            android.widget.LinearLayout row = new android.widget.LinearLayout(this);
+            row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            row.setPadding(24, 16, 24, 16);
+
+            android.widget.ImageView img = new android.widget.ImageView(this);
+            int resId = getResources().getIdentifier(s[4], "drawable", getPackageName());
+            if (resId != 0) img.setImageResource(resId);
+            img.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+            int size = (int)(56 * getResources().getDisplayMetrics().density);
+            android.widget.LinearLayout.LayoutParams imgP = new android.widget.LinearLayout.LayoutParams(size, size);
+            imgP.setMargins(0, 0, 24, 0);
+            img.setLayoutParams(imgP);
+            row.addView(img);
+
+            android.widget.LinearLayout text = new android.widget.LinearLayout(this);
+            text.setOrientation(android.widget.LinearLayout.VERTICAL);
+            text.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+            android.widget.TextView tvName = new android.widget.TextView(this);
+            tvName.setText(s[0] + "  " + s[1]);
+            tvName.setTextColor(android.graphics.Color.parseColor("#D4AF37"));
+            tvName.setTextSize(13f);
+            tvName.setTypeface(null, android.graphics.Typeface.BOLD);
+            text.addView(tvName);
+
+            android.widget.TextView tvAlibi = new android.widget.TextView(this);
+            tvAlibi.setText("알리바이: " + s[2]);
+            tvAlibi.setTextColor(android.graphics.Color.parseColor("#AAAAAA"));
+            tvAlibi.setTextSize(11f);
+            text.addView(tvAlibi);
+
+            android.widget.TextView tvMotive = new android.widget.TextView(this);
+            tvMotive.setText("동기: " + s[3]);
+            tvMotive.setTextColor(android.graphics.Color.parseColor("#FF8A8A"));
+            tvMotive.setTextSize(11f);
+            text.addView(tvMotive);
+
+            row.addView(text);
+
+            android.view.View divider = new android.view.View(this);
+            divider.setBackgroundColor(android.graphics.Color.parseColor("#2A2A40"));
+            divider.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1));
+            list.addView(row);
+            list.addView(divider);
+        }
+
+        scrollView.addView(list);
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("\uD83D\uDC65 용의자 목록")
+            .setView(scrollView)
+            .setPositiveButton("닫기", null)
+            .show();
     }
 }

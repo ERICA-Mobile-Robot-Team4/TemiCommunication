@@ -42,30 +42,6 @@
             android:textColor="#888888"
             android:textSize="12sp" />
 
-        <TextView
-            android:id="@+id/tvClueCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="단서 0/12"
-            android:textColor="#C8A96E"
-            android:textSize="12sp"
-            android:layout_marginEnd="12dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="│"
-            android:textColor="#444444"
-            android:textSize="12sp"
-            android:layout_marginEnd="12dp" />
-
-        <TextView
-            android:id="@+id/tvScore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="점수 0"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp" />
     </LinearLayout>
 
     <!-- ── 바디 (맵 + 사이드바) ── -->
@@ -610,34 +586,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 수사 진행도 (하단 고정) -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#222222"
-                android:layout_marginBottom="10dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="수사 진행도"
-                android:textColor="#666666"
-                android:textSize="10sp"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/tvProgress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0/6 장소 수사 완료"
-                android:textColor="#C8A96E"
-                android:textSize="12sp"
-                android:textStyle="bold" />
 
         </LinearLayout>
     </LinearLayout>

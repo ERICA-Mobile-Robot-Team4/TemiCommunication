@@ -3,6 +3,8 @@ package com.example.a6th_week;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -30,11 +32,12 @@ public class Mission1_4 extends AppCompatActivity implements OnRobotReadyListene
 
         robot = Robot.getInstance();
 
-        TtsRequest ttsRequest = TtsRequest.create("다음 사진을 보고 가장 의심스러운 흔적을 골라주세요", false);
-        robot.speak(ttsRequest);
-
-
         textResult = findViewById(R.id.textResult);
+
+        textResult.postDelayed(() -> {
+            if (robot != null)
+                robot.speak(TtsRequest.create("다음 사진을 보고 가장 의심스러운 흔적을 골라주세요.", false));
+        }, 3000);
 
         btnChoice1 = findViewById(R.id.btnChoice1);
         btnChoice2 = findViewById(R.id.btnChoice2);
@@ -117,31 +120,26 @@ public class Mission1_4 extends AppCompatActivity implements OnRobotReadyListene
     @Override
     protected void onStart() {
         super.onStart();
-        robot.addOnRobotReadyListener(this);
+        if (robot != null) {
+            robot.addOnRobotReadyListener(this);
+            try {
+                ActivityInfo activityInfo = getPackageManager()
+                        .getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+                robot.onStart(activityInfo);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        robot.removeOnRobotReadyListener(this);
+        if (robot != null) robot.removeOnRobotReadyListener(this);
     }
 
     @Override
     public void onRobotReady(boolean isReady) {
-        if (isReady) {
-            try {
-                final ActivityInfo activityInfo =
-                        getPackageManager().getActivityInfo(
-                                getComponentName(),
-                                PackageManager.GET_META_DATA
-                        );
-
-                robot.onStart(activityInfo);
-
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
 

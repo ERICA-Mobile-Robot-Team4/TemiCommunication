@@ -32,17 +32,20 @@
                 android:textSize="26sp" />
 
             <LinearLayout
+                android:id="@+id/btnWho"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="35dp"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="👥"
-                    android:textColor="#566275"
+                    android:textColor="#D4AF37"
                     android:textSize="18sp" />
 
                 <TextView
@@ -50,7 +53,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="WHO"
-                    android:textColor="#566275"
+                    android:textColor="#D4AF37"
                     android:textSize="11sp" />
             </LinearLayout>
 

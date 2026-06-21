@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TestActivity extends AppCompatActivity implements OnRobotReadyListener {
 
+    private static boolean introPlayed = false;
+
     // 라즈베리파이 Flask 서버 주소로 수정
     private static final String SERVER_URL = "http://10.132.3.168:5000";
 
@@ -117,10 +119,10 @@ public class TestActivity extends AppCompatActivity implements OnRobotReadyListe
                     "KANG BYUNG-CHUL",
                     "56",
                     "CHIEF BUTLER / PRIMARY SUSPECT",
-                    "Employee (30yr)",
+                    "집사 · 30년 근속",
                     "주방 설거지",
                     "횡령 사실 발각 위기",
-                    "저는 그냥 밤 11시에 블랙우드 저택을 나간 적이 없습니다. 저택의 모든 문은 제가 직접 잠급니다.",
+                    "저는 30년간 이 저택을 지켜왔습니다. 밤 11시에 저택을 나간 적이 없으며, 모든 문은 제가 직접 잠급니다.",
                     R.drawable.kang_byung_chul
             ),
             new SuspectInfo(
@@ -192,6 +194,9 @@ public class TestActivity extends AppCompatActivity implements OnRobotReadyListe
         Button btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
+        LinearLayout btnNavClues = findViewById(R.id.btnNavClues);
+        if (btnNavClues != null) btnNavClues.setOnClickListener(v -> showClueListDialog());
+
         LinearLayout btnNavSuspects = findViewById(R.id.btnNavSuspects);
         if (btnNavSuspects != null) btnNavSuspects.setOnClickListener(v -> showSuspectListDialog());
 
@@ -244,6 +249,79 @@ public class TestActivity extends AppCompatActivity implements OnRobotReadyListe
         acquiredClues.add("단서6");
         acquiredClues.add("단서9");
         acquiredClues.add("단서12");
+    }
+
+    private void showClueListDialog() {
+        List<MissionStorage.AcquiredClue> clues = MissionStorage.getAcquiredClues(this);
+
+        ScrollView scrollView = new ScrollView(this);
+        LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        list.setBackgroundColor(Color.parseColor("#0E1118"));
+        list.setPadding(16, 8, 16, 8);
+
+        if (clues.isEmpty()) {
+            TextView tvEmpty = new TextView(this);
+            tvEmpty.setText("아직 획득한 단서가 없습니다.");
+            tvEmpty.setTextColor(Color.parseColor("#777B85"));
+            tvEmpty.setTextSize(13f);
+            tvEmpty.setPadding(24, 32, 24, 32);
+            list.addView(tvEmpty);
+        } else {
+            for (MissionStorage.AcquiredClue clue : clues) {
+                // 단서 카드
+                LinearLayout card = new LinearLayout(this);
+                card.setOrientation(LinearLayout.VERTICAL);
+                card.setPadding(20, 16, 20, 16);
+                card.setBackgroundColor(Color.parseColor("#1A1F2B"));
+
+                LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                cardParams.setMargins(0, 6, 0, 6);
+                card.setLayoutParams(cardParams);
+
+                TextView tvNumber = new TextView(this);
+                tvNumber.setText("📜 단서 " + clue.number);
+                tvNumber.setTextColor(Color.parseColor("#D4AF37"));
+                tvNumber.setTextSize(11f);
+                tvNumber.setTypeface(Typeface.DEFAULT_BOLD);
+                card.addView(tvNumber);
+
+                TextView tvContent = new TextView(this);
+                // 헤더 줄(=====, 제 N단서 부분) 제거하고 본문만 표시
+                String content = clue.context;
+                String[] lines = content.split("\n");
+                StringBuilder body = new StringBuilder();
+                for (String line : lines) {
+                    if (!line.startsWith("===") && !line.contains("[제")) {
+                        if (line.trim().length() > 0) {
+                            body.append(line).append("\n");
+                        }
+                    }
+                }
+                tvContent.setText(body.toString().trim());
+                tvContent.setTextColor(Color.parseColor("#C8C8C8"));
+                tvContent.setTextSize(11f);
+                tvContent.setLineSpacing(3, 1f);
+                LinearLayout.LayoutParams contentParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                contentParams.setMargins(0, 6, 0, 0);
+                tvContent.setLayoutParams(contentParams);
+                card.addView(tvContent);
+
+                list.addView(card);
+            }
+        }
+
+        scrollView.addView(list);
+
+        new AlertDialog.Builder(this)
+                .setTitle("🗂 수집된 단서  [" + clues.size() + "/12]")
+                .setView(scrollView)
+                .setPositiveButton("닫기", null)
+                .show();
     }
 
     private void showSuspectListDialog() {
@@ -724,21 +802,28 @@ public class TestActivity extends AppCompatActivity implements OnRobotReadyListe
                             answer = "알 수 없는 응답: " + responseText;
                         }
 
-                        JSONObject assistantTurn = new JSONObject();
-                        assistantTurn.put("role", "model");
-                        assistantTurn.put("content", answer);
-                        chatHistory.add(assistantTurn);
-
-                        // 심문 기록 저장
-                        interrogationLog
-                            .computeIfAbsent(selectedSuspect, k -> new ArrayList<>())
-                            .add(new String[]{question, answer});
+                        final String finalAnswer = answer;
 
                         runOnUiThread(() -> {
+                            try {
+                                JSONObject assistantTurn = new JSONObject();
+                                assistantTurn.put("role", "model");
+                                assistantTurn.put("content", finalAnswer);
+                                chatHistory.add(assistantTurn);
+                            } catch (Exception ignored) {}
+
+                            // 심문 기록 저장
+                            List<String[]> logList = interrogationLog.get(selectedSuspect);
+                            if (logList == null) {
+                                logList = new ArrayList<>();
+                                interrogationLog.put(selectedSuspect, logList);
+                            }
+                            logList.add(new String[]{question, finalAnswer});
+
                             removeLoadingMessage();
-                            addSuspectMessage(selectedSuspect, answer);
+                            addSuspectMessage(selectedSuspect, finalAnswer);
                             updateInterrogationLogPanel();
-                            speak(answer);
+                            speak(finalAnswer);
                             btnSend.setEnabled(true);
                         });
 
@@ -989,6 +1074,13 @@ public class TestActivity extends AppCompatActivity implements OnRobotReadyListe
         super.onStart();
         if (robot != null) {
             robot.addOnRobotReadyListener(this);
+            try {
+                android.content.pm.ActivityInfo activityInfo = getPackageManager()
+                        .getActivityInfo(getComponentName(), android.content.pm.PackageManager.GET_META_DATA);
+                robot.onStart(activityInfo);
+            } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1002,7 +1094,12 @@ public class TestActivity extends AppCompatActivity implements OnRobotReadyListe
 
     @Override
     public void onRobotReady(boolean isReady) {
-        // Temi 준비 완료 시 필요한 동작이 있으면 여기에 작성
+        if (!isReady || robot == null) return;
+        if (!introPlayed) {
+            introPlayed = true;
+            robot.speak(TtsRequest.create(
+                    "용의자 심문을 시작합니다. 원하는 용의자를 선택해 심문을 시작하십시오.", false));
+        }
     }
 
     @Override
