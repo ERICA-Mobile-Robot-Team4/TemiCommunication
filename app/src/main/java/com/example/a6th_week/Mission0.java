@@ -53,52 +53,37 @@ public class Mission0 extends AppCompatActivity
         sceneServant  = findViewById(R.id.sceneServant);
         sceneHall     = findViewById(R.id.sceneHall);
 
-        // ── SCENE 1: 서재 → Mission1 (단서 1·2·3)
-        sceneStudy.setOnClickListener(v ->
-                //moveToScene("Book", Mission1.class)
-            startActivity(new Intent(Mission0.this, Mission1.class))
-        );
+        // ── SCENE 0: 심문 → Mission1
+        sceneHall.setOnClickListener(v -> moveToScene("심문", TestActivity.class));
 
-        // ── SCENE 2: 식당 → Mission2 (단서 4·5)
-        sceneDining.setOnClickListener(v ->
-                //moveToScene("Dinningroom", Mission2.class)
-                startActivity(new Intent(Mission0.this, Mission2.class))
-        );
+        // ── SCENE 1: 서재 → Mission1
+        sceneStudy.setOnClickListener(v -> moveToScene("서재", Mission1.class));
 
-        // ── SCENE 3: 주방 → Mission3 (단서 6·7·8)
-        sceneKitchen.setOnClickListener(v ->
-                        //moveToScene("주방", Mission3.class)
-            startActivity(new Intent(Mission0.this, Mission3.class))
-        );
+        // ── SCENE 2: 식당 → Mission2
+        sceneDining.setOnClickListener(v -> moveToScene("식탁", Mission2.class));
 
-        // ── SCENE 4: 지하실 → Mission4 (단서 9·10)
-        sceneBasement.setOnClickListener(v ->
-                       // moveToScene("B1", Mission4.class)
-            startActivity(new Intent(Mission0.this, Mission4.class))
-        );
+        // ── SCENE 3: 주방 → Mission3
+        sceneKitchen.setOnClickListener(v -> moveToScene("주방", Mission3.class));
 
-        // ── SCENE 5: 하인숙소 → Mission5 (단서 11·12)
-        sceneServant.setOnClickListener(v ->
-                        //moveToScene("침실", Mission5.class)
-            startActivity(new Intent(Mission0.this, Mission5.class))
-        );
+        // ── SCENE 4: 지하실 → Mission4
+        sceneBasement.setOnClickListener(v -> moveToScene("지하", Mission4.class));
 
-        // ── SCENE 6: 현관홀 → 용의자 심문 (TestActivity)
-        sceneHall.setOnClickListener(v ->
-                        //moveToScene("홈베이스", Mission5.class)
-            startActivity(new Intent(Mission0.this, TestActivity.class))
-        );
+        // ── SCENE 5: 하인숙소 → Mission5
+        sceneServant.setOnClickListener(v -> moveToScene("숙소", Mission5.class));
+
+        // ── SCENE 6: 현관홀 → 용의자 심문 (맵핑 없음, 바로 이동)
+        //sceneHall.setOnClickListener(v ->
+          //  startActivity(new Intent(Mission0.this, TestActivity.class))
+        //);
     }
 
     private void moveToScene(String locationName, Class<?> missionClass) {
-        if (robot == null) {
-            robot = Robot.getInstance();
-        }
+        if (robot == null) robot = Robot.getInstance();
 
         nextMissionName = locationName;
         nextMissionClass = missionClass;
 
-        //robot.speak(TtsRequest.create(locationName + "로 이동합니다.", false));
+        robot.speak(TtsRequest.create(locationName + "으로 이동합니다.", false));
         robot.goTo(locationName);
     }
 
@@ -111,20 +96,28 @@ public class Mission0 extends AppCompatActivity
     ) {
         if (nextMissionClass == null) return;
 
-        if (location.equals(nextMissionName) && status.equals("complete")) {
-
-            Intent intent = new Intent(Mission0.this, nextMissionClass);
-            startActivity(intent);
-
+        if (status.equals(OnGoToLocationStatusChangedListener.COMPLETE)) {
+            Class<?> target = nextMissionClass;
             nextMissionClass = null;
             nextMissionName = "";
+            runOnUiThread(() -> startActivity(new Intent(Mission0.this, target)));
+
+        } else if (status.equals(OnGoToLocationStatusChangedListener.ABORT)) {
+            nextMissionClass = null;
+            nextMissionName = "";
+            runOnUiThread(() ->
+                robot.speak(TtsRequest.create("이동에 실패했습니다. 다시 시도해 주세요.", false))
+            );
         }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (robot != null) robot.addOnRobotReadyListener(this);
+        if (robot != null) {
+            robot.addOnRobotReadyListener(this);
+            robot.addOnGoToLocationStatusChangedListener(this);
+        }
     }
 
     @Override
@@ -132,7 +125,7 @@ public class Mission0 extends AppCompatActivity
         super.onStop();
         if (robot != null) {
             robot.removeOnRobotReadyListener(this);
-            //robot.cancelAllTtsRequests();
+            robot.removeOnGoToLocationStatusChangedListener(this);
         }
     }
 
