@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0B0E13">
+
+    <!-- TOP BAR -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:background="#10141C">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="← 뒤로"
+            android:textColor="#C8A83A"
+            android:textSize="11sp"
+            android:backgroundTint="#33C8A83A"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="FINAL INTERROGATION: Ⅲ"
+            android:textColor="#C8A83A"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.06" />
+
+        <LinearLayout
+            android:layout_width="210dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CASE SUBJECT"
+                android:textColor="#777B85"
+                android:textSize="8sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvCaseSubject"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KANG BYUNG-CHUL"
+                android:textColor="#D8D8D8"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end"
+            android:layout_marginEnd="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SUSPECT HEART RATE"
+                android:textColor="#B97878"
+                android:textSize="8sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvHeartRate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="● 114 BPM"
+                android:textColor="#FF8A8A"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="82dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="03:00"
+            android:textColor="#FFB3B3"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:background="#4A1717" />
+    </LinearLayout>
+
+
+    <!-- BODY -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <!-- LEFT NAV -->
+        <LinearLayout
+            android:layout_width="42dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="18dp"
+            android:paddingBottom="12dp"
+            android:background="#141821">
+
+            <TextView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="⌖"
+                android:textColor="#777B85"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:layout_marginTop="14dp"
+                android:text="⚖"
+                android:textColor="#C8A83A"
+                android:textSize="15sp"
+                android:background="#2B2A1B" />
+
+            <TextView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:layout_marginTop="14dp"
+                android:text="♟"
+                android:textColor="#777B85"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="⚙"
+                android:textColor="#777B85"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+
+        <!-- LEFT PROFILE -->
+        <LinearLayout
+            android:layout_width="190dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:background="#151922">
+
+            <com.example.a6th_week.TopCropImageView
+                android:id="@+id/imgSuspect"
+                android:layout_width="match_parent"
+                android:layout_height="128dp"
+                android:scaleType="matrix"
+                android:background="#080A0F"
+                android:src="@drawable/kang_byung_chul" />
+
+            <TextView
+                android:id="@+id/tvProfileName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:text="강병철 (56)"
+                android:textColor="#D4AF37"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvProfileRole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CHIEF BUTLER / PRIMARY SUSPECT"
+                android:textColor="#D4AF37"
+                android:textSize="8sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSuspectQuote"
+                android:layout_width="match_parent"
+                android:layout_height="82dp"
+                android:layout_marginTop="10dp"
+                android:padding="9dp"
+                android:text="“저는 그냥 밤 11시에 아르곤 저택을 나간 적이 없습니다. 저택의 모든 문은 제가 직접 잠급니다.”"
+                android:textColor="#D7D7D7"
+                android:textSize="10sp"
+                android:lineSpacingExtra="2dp"
+                android:background="#20242E" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="OCCUPATION"
+                android:textColor="#777B85"
+                android:textSize="8sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvOccupation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Employee (30yr)"
+                android:textColor="#D8D8D8"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:gravity="end" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:text="ALIBI"
+                android:textColor="#777B85"
+                android:textSize="8sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvAlibi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="• 주방 설거지"
+                android:textColor="#FF8A8A"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:gravity="end" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:text="MOTIVE"
+                android:textColor="#777B85"
+                android:textSize="8sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvMotive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="횡령 사실 발각 위기"
+                android:textColor="#D8D8D8"
+                android:textSize="10sp"
+                android:gravity="end" />
+
+        </LinearLayout>
+
+
+        <!-- CENTER CHAT AREA -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="#0B0E13">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="● SECURE CRIMINAL · LIVE FEED"
+                android:textColor="#FF5A5A"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:background="#1B202A" />
+
+            <ScrollView
+                android:id="@+id/scrollView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="10dp"
+                android:fillViewport="true"
+                android:background="#0E121A">
+
+                <LinearLayout
+                    android:id="@+id/layoutChat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp" />
+            </ScrollView>
+
+            <!-- BOTTOM COMMAND AREA -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:background="#11151D">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="COMMAND DECISION TERMINAL"
+                        android:textColor="#FF8A8A"
+                        android:textSize="8sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etQuestion"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginTop="4dp"
+                        android:hint="질문을 입력하세요..."
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#777C88"
+                        android:textSize="13sp"
+                        android:singleLine="true"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:background="#171B24" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnSend"
+                    android:layout_width="104dp"
+                    android:layout_height="54dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="심문"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="#8B1E1E" />
+
+                <Button
+                    android:id="@+id/btnAccuse"
+                    android:layout_width="112dp"
+                    android:layout_height="54dp"
+                    android:text="검거"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:backgroundTint="#B02020" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <!-- RIGHT SUSPECT + EVIDENCE PANEL -->
+        <LinearLayout
+            android:layout_width="220dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:background="#151922">
+
+            <!-- SUSPECT SELECT -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SUSPECT SELECT"
+                android:textColor="#D4AF37"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginTop="8dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutSuspects"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+
+            <!-- EVIDENCE TITLE -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="28dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="EVIDENCE LOG"
+                    android:textColor="#D4AF37"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvEvidenceCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5/12 FOUND"
+                    android:textColor="#777B85"
+                    android:textSize="8sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- EVIDENCE LIST -->
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="6dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutClues"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+
+            <Button
+                android:id="@+id/btnHint"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="HINT ANALYSIS"
+                android:textColor="#777B85"
+                android:textSize="10sp"
+                android:backgroundTint="#1B1F29" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <!-- FOOTER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:background="#0A0D12">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="AFID SCANNER ONLINE"
+            android:textColor="#B97878"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CONNECTED · ENCRYPTED CASE-103"
+            android:textColor="#3F5F5F"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

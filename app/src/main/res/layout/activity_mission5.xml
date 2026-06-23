@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#0F1218">
+
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#131722"
+        android:gravity="center_horizontal"
+        android:paddingTop="30dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="≡"
+            android:textColor="#D4AF37"
+            android:textSize="26sp"
+            android:layout_marginBottom="45dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="35dp"
+            android:id="@+id/btnWho"
+            android:clickable="true"
+            android:focusable="true">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="👥"
+                android:textColor="#566275"
+                android:textSize="18sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WHO"
+                android:textColor="#566275"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="35dp">
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="45dp"
+                android:background="#D4AF37"/>
+
+            <LinearLayout
+                android:id="@+id/btnClue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📜"
+                    android:textColor="#D4AF37"
+                    android:textSize="18sp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CLUE"
+                    android:textColor="#D4AF37"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="2dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📄"
+                android:textColor="#566275"
+                android:textSize="18sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FILE"
+                android:textColor="#566275"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="THE MOURNING ESTATE"
+                android:textColor="#D4AF37"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentEnd="true"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EVIDENCE"
+                    android:textColor="#D4AF37"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="20dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ARCHIVES"
+                    android:textColor="#566275"
+                    android:textSize="13sp"
+                    android:layout_marginEnd="20dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⏱ 00:45:12"
+                    android:textColor="#D4AF37"
+                    android:textSize="13sp"
+                    android:background="#161B26"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/layoutMainGame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:weightSum="10"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="7"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="18dp">
+
+                    <TextView
+                        android:id="@+id/txtTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SCENE 5: PRIVATE QUARTERS"
+                        android:textColor="#566275"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.05" />
+
+                    <TextView
+                        android:id="@+id/txtHint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="하인 숙소"
+                        android:textColor="#FFFFFF"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutRfidPanel"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:background="#131722"
+                        android:padding="20dp"
+                        android:layout_marginBottom="14dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="55dp"
+                            android:layout_height="55dp"
+                            android:text="回"
+                            android:textColor="#D4AF37"
+                            android:textSize="28sp"
+                            android:gravity="center"
+                            android:background="#1C212E"
+                            android:layout_marginEnd="18dp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="STEP 01   |   RFID SYSTEM"
+                                android:textColor="#566275"
+                                android:textSize="11sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:id="@+id/txtRfidStatusDashboard"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="AWAITING TAG"
+                                android:textColor="#D4AF37"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/txtRfidCompleteLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="COMPLETE"
+                            android:textColor="#4CAF50"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.05"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layoutVoicePanel"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:background="#131722"
+                        android:padding="20dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/txtVoiceMicIcon"
+                            android:layout_width="55dp"
+                            android:layout_height="55dp"
+                            android:text="🎙"
+                            android:textColor="#D4AF37"
+                            android:textSize="26sp"
+                            android:gravity="center"
+                            android:background="#1C212E"
+                            android:layout_marginEnd="18dp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="STEP 02   |   VOICE DECRYPTION"
+                                android:textColor="#566275"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <FrameLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp">
+                                <TextView
+                                    android:id="@+id/txtVoiceHintContent"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="#D4AF37"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:gravity="start"
+                                    android:text="AWAITING VOICE"
+                                    android:visibility="visible" />
+                            </FrameLayout>
+
+                            <Button
+                                android:id="@+id/btnVoiceStart"
+                                android:layout_width="match_parent"
+                                android:layout_height="44dp"
+                                android:text="RECORDING START"
+                                android:textStyle="bold"
+                                android:textSize="13sp"
+                                android:textColor="#FFFFFF"
+                                android:backgroundTint="#8C1111"
+                                android:layout_marginTop="8dp"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:orientation="vertical"
+                    android:background="#131722"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ANALYSIS DEPTH"
+                        android:textColor="#566275"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.05" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="32dp"
+                            android:text="  Easy"
+                            android:textColor="#566275"
+                            android:textSize="13sp"
+                            android:gravity="center_vertical"
+                            android:background="#0F1218"
+                            android:layout_marginBottom="4dp"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="35dp"
+                            android:text="  ✓ Normal"
+                            android:textColor="#D4AF37"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:gravity="center_vertical"
+                            android:background="#1E2330"
+                            android:layout_marginBottom="4dp"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="32dp"
+                            android:text="  Hard"
+                            android:textColor="#566275"
+                            android:textSize="13sp"
+                            android:gravity="center_vertical"
+                            android:background="#0F1218"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔍 HINT INTERFACE PROTOCOL"
+                        android:textColor="#566275"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <LinearLayout
+                        android:id="@+id/layoutHintOptions"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <Button
+                            android:id="@+id/btnHint1"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:text="① -15점 : level1 힌트"
+                            android:textSize="12sp"
+                            android:textColor="#E3DCCB"
+                            android:backgroundTint="#251215"
+                            android:layout_marginBottom="4dp"/>
+
+                        <Button
+                            android:id="@+id/btnHint2"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:text="② -10점 : level2 힌트"
+                            android:textSize="12sp"
+                            android:textColor="#E3DCCB"
+                            android:backgroundTint="#251215"
+                            android:layout_marginBottom="4dp"/>
+
+                        <Button
+                            android:id="@+id/btnHint3"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:text="③ -5점 : level3 힌트"
+                            android:textSize="12sp"
+                            android:textColor="#E3DCCB"
+                            android:backgroundTint="#251215"
+                            android:layout_marginBottom="4dp"/>
+
+                        <Button
+                            android:id="@+id/btnHint4"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:text="④ 힌트 없이 재시도"
+                            android:textSize="12sp"
+                            android:textColor="#FFFFFF"
+                            android:backgroundTint="#251215"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="CLUE LOG\n\n&quot;침대 밑 헐거워진 바닥판 사이에서 발견된 카드. 누군가 들키지 않고 빠져나가려 했던 흔적이다.&quot;"
+                        android:textColor="#8A99AD"
+                        android:textSize="12sp"
+                        android:lineSpacingMultiplier="1.2"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutClueContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/txtClueLeft"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="8dp"
+                    android:textSize="20sp"
+                    android:textColor="#2D1B18"
+                    android:lineSpacingMultiplier="1.3"
+                    android:scrollbars="vertical"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/txtClueRight"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="8dp"
+                    android:textSize="20sp"
+                    android:textColor="#2D1B18"
+                    android:lineSpacingMultiplier="1.3"
+                    android:scrollbars="vertical"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>
