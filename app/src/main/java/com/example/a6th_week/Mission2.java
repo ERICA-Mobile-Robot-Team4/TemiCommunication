@@ -1,8 +1,6 @@
 package com.example.a6th_week;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,43 +9,43 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import com.robotemi.sdk.Robot;
-import com.robotemi.sdk.listeners.OnRobotReadyListener;
 import com.robotemi.sdk.TtsRequest;
+import com.robotemi.sdk.listeners.OnRobotReadyListener;
 
 public class Mission2 extends AppCompatActivity implements OnRobotReadyListener {
 
-    private static boolean introPlayed = false;
     private Robot robot;
 
     private LinearLayout layoutMainPlayArea;
     private LinearLayout layoutArchiveGrid;
     private LinearLayout layoutClueContainer;
 
+    private TextView btnBack;
     private TextView txtCharlesContent, txtEdwardContent, txtHenryContent, txtWilliamContent;
     private LinearLayout panelCharles, panelEdward, panelHenry, panelWilliam;
 
     private TextView txtClueLeft, txtClueRight;
     private TextView txtStatusDashboard;
-    private TextView btnBack;
 
-    LinearLayout btnClue;
     private LinearLayout txtWordPoolGuide;
     private TextView txtInputStatus;
-    private TextView btnResetMission; // 🛠️ 리셋 버튼 변수
+    private TextView btnResetMission;
 
     private int wrongCount = 0;
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
+    private ValueEventListener firebaseListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +53,12 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         setContentView(R.layout.activity_mission2);
 
         robot = Robot.getInstance();
+
         txtStatusDashboard = findViewById(R.id.txtStatusDashboard);
 
-        txtWordPoolGuide = (LinearLayout) findViewById(R.id.txtWordPoolGuide);
+        txtWordPoolGuide = findViewById(R.id.txtWordPoolGuide);
         txtInputStatus = findViewById(R.id.txtInputStatus);
-        btnResetMission = findViewById(R.id.btnResetMission); // 🛠️ 리셋 버튼 뷰 연결
+        btnResetMission = findViewById(R.id.btnResetMission);
 
         layoutMainPlayArea = findViewById(R.id.layoutMainPlayArea);
         layoutArchiveGrid = findViewById(R.id.layoutArchiveGrid);
@@ -84,16 +83,11 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         txtWilliamContent.setMovementMethod(new android.text.method.ScrollingMovementMethod());
         txtClueLeft.setMovementMethod(new android.text.method.ScrollingMovementMethod());
         txtClueRight.setMovementMethod(new android.text.method.ScrollingMovementMethod());
-        btnClue = findViewById(R.id.btnClue);
+
+        firebaseDatabase = FirebaseDatabase.getInstance("https://temi-team4-default-rtdb.firebaseio.com");
+        databaseReference = firebaseDatabase.getReference("result/result");
+
         btnBack = findViewById(R.id.btnBack);
-        btnClue.setOnClickListener(v -> {
-            Intent intent = new Intent(Mission2.this, ClueActivity.class);
-            startActivity(intent);
-        });
-
-        android.widget.LinearLayout btnWho = findViewById(R.id.btnWho);
-        if (btnWho != null) btnWho.setOnClickListener(v -> showSuspectListDialog());
-
         btnBack.setOnClickListener(v -> {
 //            if (timer != null) {
 //                timer.cancel();
@@ -107,11 +101,6 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
             finish();
         });
 
-
-        firebaseDatabase = FirebaseDatabase.getInstance("https://temi-team4-default-rtdb.firebaseio.com");
-        databaseReference = firebaseDatabase.getReference("temi_command");
-
-        // 🛠️ 리셋 버튼 클릭 이벤트 구현 (버튼 누르면 파이어베이스로 RESET 전송)
         if (btnResetMission != null) {
             btnResetMission.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -121,88 +110,146 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
             });
         }
 
-        // 앱 처음 켤 때는 음성이 나오도록 false 전달
+        // 앱 처음 켤 때는 안내 음성 나오게 false
         startMissionImmediately(false);
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        firebaseListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                android.util.Log.d("MISSION2_FB", "Firebase 수신값: " + dataSnapshot.getValue());
+
                 final String command = dataSnapshot.getValue(String.class);
-                if (command != null) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (command.startsWith("SEQUENCE_")) {
-                                String currentSequence = command.replace("SEQUENCE_", "");
-                                updateInputStatusDashboard(currentSequence);
-                            }
-                            else if (command.equals("WRONG")) {
-                                wrongCount++;
 
-                                if (wrongCount >= 2) {
-                                    if (txtInputStatus != null) {
-                                        txtInputStatus.setBackgroundResource(R.drawable.panel_red_border);
-                                    }
-                                    processMissionResult();
-                                } else {
-                                    robot.speak(TtsRequest.create("틀렸습니다. 다시 시도하세요.", false));
+                if (command == null) return;
 
-                                    txtStatusDashboard.setVisibility(View.VISIBLE);
-                                    txtStatusDashboard.setText("❌ LOCK ERROR: 잘못된 순서입니다! 다시 입력하세요. (누적 오답: " + wrongCount + "/2회)");
-                                    txtStatusDashboard.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                                    if (txtInputStatus != null) {
-                                        txtInputStatus.setText("[ 인증 실패 ]");
-                                        txtInputStatus.setBackgroundResource(R.drawable.panel_red_border);
-                                        txtInputStatus.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
-                                    }
+                        String normalizedCommand = command.trim();
 
-                                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (!isFinishing() && wrongCount < 2) {
-                                                if (txtInputStatus != null) {
-                                                    txtInputStatus.setText("[ 다시 시도하십시오 ]");
-                                                    txtInputStatus.setBackgroundResource(R.drawable.panel_yellow_border);
-                                                    txtInputStatus.setTextColor(android.graphics.Color.parseColor("#D4AF37"));
-                                                }
-                                            }
-                                        }
-                                    }, 2500);
-
-                                    databaseReference.setValue("WAITING_INPUT");
-                                }
-                            }
-                            else if (command.equals("SUCCESS")) {
-                                txtStatusDashboard.setVisibility(View.VISIBLE);
-                                txtStatusDashboard.setText("🔓 ACCESS GRANTED: 올바른 입력입니다! 잠금 장치가 해제되었습니다.");
-                                txtStatusDashboard.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
-                                txtWordPoolGuide.setVisibility(View.GONE);
-
-                                if (txtInputStatus != null) {
-                                    txtInputStatus.setText("🔓 잠금 해제 완료");
-                                    txtInputStatus.setBackgroundResource(R.drawable.panel_green_border);
-                                    txtInputStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
-                                }
-
-                                processMissionResult();
-                            }
-                            else if (command.equals("RESET")) {
-                                wrongCount = 0;
-                                layoutClueContainer.setVisibility(View.GONE);
-                                // 🛠️ 리셋 명령이 수행될 때는 음성이 안 나오도록 true 전달
-                                startMissionImmediately(true);
-                            }
+                        if (normalizedCommand.equals("success")) {
+                            handleSuccess();
                         }
-                    });
-                }
+                        else if (normalizedCommand.equals("fail")) {
+                            handleFail();
+                        }
+                        else if (normalizedCommand.equals("RESET")) {
+                            handleReset();
+                        }
+                        else {
+                            android.util.Log.d("MISSION2_FB", "무시된 Firebase 값: " + normalizedCommand);
+                        }
+                    }
+                });
             }
+
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
+            public void onCancelled(DatabaseError databaseError) {
+                android.util.Log.e("MISSION2_FB", "Firebase 오류: " + databaseError.getMessage());
+            }
+        };
+
+        databaseReference.addValueEventListener(firebaseListener);
     }
 
-    // 🛠️ 매개변수 isReset을 추가하여 리셋 여부에 따라 분기 처리합니다.
+    private void handleSuccess() {
+        txtStatusDashboard.setVisibility(View.VISIBLE);
+        txtStatusDashboard.setText("🔓 ACCESS GRANTED: 올바른 입력입니다! 잠금 장치가 해제되었습니다.");
+        txtStatusDashboard.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+        txtWordPoolGuide.setVisibility(View.GONE);
+
+        if (txtInputStatus != null) {
+            txtInputStatus.setText("🔓 잠금 해제 완료");
+            txtInputStatus.setBackgroundResource(R.drawable.panel_green_border);
+            txtInputStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+        }
+
+        processMissionResult();
+    }
+
+    private void handleFail() {
+        wrongCount++;
+
+        if (wrongCount >= 2) {
+            if (txtInputStatus != null) {
+                txtInputStatus.setText("[ 인증 실패 ]");
+                txtInputStatus.setBackgroundResource(R.drawable.panel_red_border);
+                txtInputStatus.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+            }
+
+            processMissionResult();
+        } else {
+            if (robot != null) {
+                robot.speak(TtsRequest.create("틀렸습니다. 다시 시도하세요.", false));
+            }
+
+            txtStatusDashboard.setVisibility(View.VISIBLE);
+            txtStatusDashboard.setText("❌ LOCK ERROR: 잘못된 순서입니다! 다시 입력하세요. (누적 오답: " + wrongCount + "/2회)");
+            txtStatusDashboard.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+
+            if (txtInputStatus != null) {
+                txtInputStatus.setText("[ 인증 실패 ]");
+                txtInputStatus.setBackgroundResource(R.drawable.panel_red_border);
+                txtInputStatus.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+            }
+
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isFinishing() && wrongCount < 2) {
+                        if (txtInputStatus != null) {
+                            txtInputStatus.setText("[ 다시 시도하십시오 ]");
+                            txtInputStatus.setBackgroundResource(R.drawable.panel_yellow_border);
+                            txtInputStatus.setTextColor(android.graphics.Color.parseColor("#D4AF37"));
+                        }
+                    }
+                }
+            }, 2500);
+
+            databaseReference.setValue("WAITING_INPUT");
+        }
+    }
+
+    private void handleReset() {
+        wrongCount = 0;
+        layoutClueContainer.setVisibility(View.GONE);
+        startMissionImmediately(true);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (robot != null) robot.addOnRobotReadyListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (robot != null) robot.removeOnRobotReadyListener(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (databaseReference != null && firebaseListener != null) {
+            databaseReference.removeEventListener(firebaseListener);
+        }
+    }
+
+    @Override
+    public void onRobotReady(boolean isReady) {
+        if (!isReady || robot == null) return;
+
+        try {
+            ActivityInfo info = getPackageManager()
+                    .getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+            robot.onStart(info);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void startMissionImmediately(boolean isReset) {
         if (robot != null) {
             robot.cancelAllTtsRequests();
@@ -221,7 +268,6 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         layoutArchiveGrid.setPadding(0, 0, 0, 0);
         layoutArchiveGrid.removeAllViews();
 
-        // 상단 가문 행(찰스 / 에드워드) 복구
         LinearLayout rowTop = new LinearLayout(this);
         rowTop.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         rowTop.setOrientation(LinearLayout.HORIZONTAL);
@@ -237,12 +283,16 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         panelEdward.setLayoutParams(lpMarginL);
         panelEdward.setVisibility(View.VISIBLE);
 
-        if(panelCharles.getParent() != null) ((ViewGroup)panelCharles.getParent()).removeView(panelCharles);
-        if(panelEdward.getParent() != null) ((ViewGroup)panelEdward.getParent()).removeView(panelEdward);
+        if (panelCharles.getParent() != null) {
+            ((ViewGroup) panelCharles.getParent()).removeView(panelCharles);
+        }
+        if (panelEdward.getParent() != null) {
+            ((ViewGroup) panelEdward.getParent()).removeView(panelEdward);
+        }
+
         rowTop.addView(panelCharles);
         rowTop.addView(panelEdward);
 
-        // 하단 가문 행(헨리 / 윌리엄) 복구
         LinearLayout rowBottom = new LinearLayout(this);
         rowBottom.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         rowBottom.setOrientation(LinearLayout.HORIZONTAL);
@@ -261,12 +311,18 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         for (int i = 0; i < panelWilliam.getChildCount(); i++) {
             panelWilliam.getChildAt(i).setVisibility(View.VISIBLE);
         }
+
         panelWilliam.setBackgroundColor(android.graphics.Color.parseColor("#131722"));
         txtWilliamContent.setTextSize(14);
         txtWilliamContent.setGravity(android.view.Gravity.LEFT | android.view.Gravity.TOP);
 
-        if(panelHenry.getParent() != null) ((ViewGroup)panelHenry.getParent()).removeView(panelHenry);
-        if(panelWilliam.getParent() != null) ((ViewGroup)panelWilliam.getParent()).removeView(panelWilliam);
+        if (panelHenry.getParent() != null) {
+            ((ViewGroup) panelHenry.getParent()).removeView(panelHenry);
+        }
+        if (panelWilliam.getParent() != null) {
+            ((ViewGroup) panelWilliam.getParent()).removeView(panelWilliam);
+        }
+
         rowBottom.addView(panelHenry);
         rowBottom.addView(panelWilliam);
 
@@ -278,6 +334,7 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         txtStatusDashboard.setTextColor(android.graphics.Color.parseColor("#D4AF37"));
 
         if (txtInputStatus != null) {
+            txtInputStatus.setVisibility(View.VISIBLE);
             txtInputStatus.setText("[ 대기 중... ]");
             txtInputStatus.setBackgroundResource(0);
             txtInputStatus.setBackgroundColor(android.graphics.Color.parseColor("#131722"));
@@ -285,11 +342,10 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         }
 
         databaseReference.setValue("START_BASEMENT");
+
         showSplitDocuments();
 
-        // 리셋이 아니고 처음 입장할 때만 안내 TTS 송출
-        if (!isReset && !introPlayed) {
-            introPlayed = true;
+        if (!isReset) {
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -301,52 +357,67 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         }
     }
 
-    private void updateInputStatusDashboard(String sequence) {
-        if (txtInputStatus == null) return;
-
-        txtInputStatus.setBackgroundResource(R.drawable.panel_yellow_border);
-        txtInputStatus.setTextColor(android.graphics.Color.parseColor("#D4AF37"));
-
-        String visualProgress = sequence
-                .replace("검", "검")
-                .replace("방패", "방패")
-                .replace("독수리", "독수리")
-                .replace("장미", "장미")
-                .replace(",", "  >  ");
-
-        txtInputStatus.setText(visualProgress);
-    }
-
     private void showSplitDocuments() {
-        txtCharlesContent.setText("찰스 블랙우드의 시대,\n처음으로 저택 정원에 씨앗이 뿌려졌다.\n\"힘만으로는 사람의 마음을\n 얻을 수 없다는 것을 알았노라\"\n\n후대 사람들은 그를 이렇게 불렀다:\n\"────의 사나이\"");
-        txtEdwardContent.setText("에드워드 블랙우드는 땅 위의 것에 만족하지 않았다.\n저택 가장 높은 곳에 올라\n지평선 너머를 바라보며 말했다:\n\"저 너머에도 우리의 것이 있다\"\n\n후대 사람들은 그를 이렇게 불렀다:\n\"────의 사나이\"");
-        txtHenryContent.setText("헨리 블랙우드의 재임 기간, 저택은 단 한 번도\n외부의 침략을 허용하지 않았다.\n\"형이 쌓은 것을 절대 잃지 않겠다\"\n\n후대 사람들은 그를 이렇게 불렀다:\n\"────의 사나이\"");
-        txtWilliamContent.setText("윌리엄 블랙우드는 죽는 날까지 단 한 번도\n협상 테이블에 앉지 않았다.\n원하는 것을 언제나\n직접 손으로 가져갔다.\n\n후대 사람들은 그를 이렇게 불렀다:\n\"────의 사나이\"");
+        txtCharlesContent.setText(
+                "찰스 블랙우드의 시대,\n" +
+                        "처음으로 저택 정원에 씨앗이 뿌려졌다.\n" +
+                        "\"힘만으로는 사람의 마음을\n 얻을 수 없다는 것을 알았노라\"\n\n" +
+                        "후대 사람들은 그를 이렇게 불렀다:\n" +
+                        "\"────의 사나이\""
+        );
+
+        txtEdwardContent.setText(
+                "에드워드 블랙우드는 땅 위의 것에 만족하지 않았다.\n" +
+                        "저택 가장 높은 곳에 올라\n" +
+                        "지평선 너머를 바라보며 말했다:\n" +
+                        "\"저 너머에도 우리의 것이 있다\"\n\n" +
+                        "후대 사람들은 그를 이렇게 불렀다:\n" +
+                        "\"────의 사나이\""
+        );
+
+        txtHenryContent.setText(
+                "헨리 블랙우드의 재임 기간, 저택은 단 한 번도\n" +
+                        "외부의 침략을 허용하지 않았다.\n" +
+                        "\"형이 쌓은 것을 절대 잃지 않겠다\"\n\n" +
+                        "후대 사람들은 그를 이렇게 불렀다:\n" +
+                        "\"────의 사나이\""
+        );
+
+        txtWilliamContent.setText(
+                "윌리엄 블랙우드는 죽는 날까지 단 한 번도\n" +
+                        "협상 테이블에 앉지 않았다.\n" +
+                        "원하는 것을 언제나\n" +
+                        "직접 손으로 가져갔다.\n\n" +
+                        "후대 사람들은 그를 이렇게 불렀다:\n" +
+                        "\"────의 사나이\""
+        );
     }
 
     private void processMissionResult() {
-        String clue4 = "━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-                " 📜 [단서 4] 찢어진 유언장 초안\n" +
-                "━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
-                "식당 근처 쓰레기통에서 찢어진 유언장 초안 일부가 발견되었다.\n" +
-                "확인 가능한 문장은 다음과 같았다.\n\n" +
-                "“윤재호에게 경영권을 넘기지 않는다.”\n" +
-                "“윤수아의 해외 사업 지원을 중단한다.”\n" +
-                "“박미경과의 혼인 관계를 정리한다.”\n" +
-                "“저택 매각 계획은 보류한다.”\n\n" +
-                "하나 같이 용의자들이 윤태성 회장에게 앙심을 가질만한 내용이다.\n" +
-                "마지막 문장은 찢겨 있어 읽을 수 없었다.\n";
+        String clue4 =
+                "━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                        " 📜 [단서 4] 찢어진 유언장 초안\n" +
+                        "━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+                        "식당 근처 쓰레기통에서 찢어진 유언장 초안 일부가 발견되었다.\n" +
+                        "확인 가능한 문장은 다음과 같았다.\n\n" +
+                        "“윤재호에게 경영권을 넘기지 않는다.”\n" +
+                        "“윤수아의 해외 사업 지원을 중단한다.”\n" +
+                        "“박미경과의 혼인 관계를 정리한다.”\n" +
+                        "“저택 매각 계획은 보류한다.”\n\n" +
+                        "하나 같이 용의자들이 윤태성 회장에게 앙심을 가질만한 내용이다.\n" +
+                        "마지막 문장은 찢겨 있어 읽을 수 없었다.\n";
 
-        String clue5 = "━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-                " 📜 [단서 5] 와인 얼룩이 번진 쪽지\n" +
-                "━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
-                "\"회장의 와인잔 아래에서 작은 쪽지가 발견되었다.\n" +
-                "가장자리는 급하게 찢겨 있었고, 아래쪽에는 와인 얼룩이 번져 있었다.\n\n" +
-                "쪽지에는 다음과 같이 적혀 있었다.\n\n" +
-                "\"자네가 한 짓, 내가 알았소.\n" +
-                " 오늘 밤 서재에서 끝을 봅세.\n" +
-                " 더 늦기 전에 자네 입으로 말하게\"\n\n" +
-                "수신인의 이름은 와인 얼룩에 가려져 확인할 수 없었다.\n";
+        String clue5 =
+                "━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                        " 📜 [단서 5] 와인 얼룩이 번진 쪽지\n" +
+                        "━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+                        "\"회장의 와인잔 아래에서 작은 쪽지가 발견되었다.\n" +
+                        "가장자리는 급하게 찢겨 있었고, 아래쪽에는 와인 얼룩이 번져 있었다.\n\n" +
+                        "쪽지에는 다음과 같이 적혀 있었다.\n\n" +
+                        "\"자네가 한 짓, 내가 알았소.\n" +
+                        " 오늘 밤 서재에서 끝을 봅세.\n" +
+                        " 더 늦기 전에 자네 입으로 말하게\"\n\n" +
+                        "수신인의 이름은 와인 얼룩에 가려져 확인할 수 없었다.\n";
 
         if (wrongCount == 0) {
             layoutMainPlayArea.setVisibility(View.VISIBLE);
@@ -354,7 +425,10 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
             layoutClueContainer.setVisibility(View.VISIBLE);
             txtWordPoolGuide.setVisibility(View.GONE);
 
-            robot.speak(TtsRequest.create("잠금 해제 성공. 단 한 번의 실수 없이 정답을 맞혀 두 가지 단서를 모두 획득했습니다.", false));
+            if (robot != null) {
+                robot.speak(TtsRequest.create("잠금 해제 성공. 단 한 번의 실수 없이 정답을 맞혀 두 가지 단서를 모두 획득했습니다.", false));
+            }
+
             txtClueLeft.setVisibility(View.VISIBLE);
             setPaperStyle(txtClueLeft);
             txtClueLeft.setText(clue4);
@@ -362,13 +436,17 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
             txtClueRight.setVisibility(View.VISIBLE);
             setPaperStyle(txtClueRight);
             txtClueRight.setText(clue5);
-        } else if (wrongCount == 1) {
+        }
+        else if (wrongCount == 1) {
             layoutMainPlayArea.setVisibility(View.VISIBLE);
             layoutArchiveGrid.setVisibility(View.GONE);
             layoutClueContainer.setVisibility(View.VISIBLE);
             txtWordPoolGuide.setVisibility(View.GONE);
 
-            robot.speak(TtsRequest.create("잠금 해제 성공. 오답 이력이 존재하여 한 가지 단서만 제공합니다.", false));
+            if (robot != null) {
+                robot.speak(TtsRequest.create("잠금 해제 성공. 오답 이력이 존재하여 한 가지 단서만 제공합니다.", false));
+            }
+
             txtClueLeft.setVisibility(View.VISIBLE);
             setPaperStyle(txtClueLeft);
 
@@ -376,8 +454,10 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
             lp.weight = 2f;
             txtClueLeft.setLayoutParams(lp);
             txtClueLeft.setText(clue4);
+
             txtClueRight.setVisibility(View.GONE);
-        } else {
+        }
+        else {
             layoutMainPlayArea.setVisibility(View.VISIBLE);
             txtWordPoolGuide.setVisibility(View.VISIBLE);
             txtStatusDashboard.setVisibility(View.VISIBLE);
@@ -399,6 +479,7 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
             if (txtWilliamContent.getParent() != null) {
                 ((ViewGroup) txtWilliamContent.getParent()).removeView(txtWilliamContent);
             }
+
             layoutArchiveGrid.removeAllViews();
             layoutArchiveGrid.addView(txtWilliamContent);
 
@@ -406,17 +487,24 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT
             );
+
             txtWilliamContent.setLayoutParams(lpScreen);
             txtWilliamContent.setVisibility(View.VISIBLE);
             txtWilliamContent.setTextSize(26);
             txtWilliamContent.setGravity(android.view.Gravity.CENTER);
             txtWilliamContent.setTextColor(android.graphics.Color.parseColor("#FF4444"));
-            txtWilliamContent.setText("💀 SECURITY BREACH\n\n오답 제한 초과(2회)로 인해\n시스템 내의 모든 단서가 영구 파괴되었습니다.");
+            txtWilliamContent.setText(
+                    "💀 SECURITY BREACH\n\n" +
+                            "오답 제한 초과(2회)로 인해\n" +
+                            "시스템 내의 모든 단서가 영구 파괴되었습니다."
+            );
 
             txtStatusDashboard.setText("❌ MISSION FAILED: 오답 제한 초과로 시스템이 종료 되었습니다.");
             txtStatusDashboard.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
 
-            robot.speak(TtsRequest.create("입력 허용 횟수 초과로 내부 단서가 소멸되었습니다.", false));
+            if (robot != null) {
+                robot.speak(TtsRequest.create("입력 허용 횟수 초과로 내부 단서가 소멸되었습니다.", false));
+            }
         }
     }
 
@@ -427,104 +515,4 @@ public class Mission2 extends AppCompatActivity implements OnRobotReadyListener 
         textView.setBackgroundColor(android.graphics.Color.parseColor("#E3DCCB"));
         textView.setTextColor(android.graphics.Color.parseColor("#2D1B18"));
     }
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (robot != null) robot.addOnRobotReadyListener(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (robot != null) {
-            robot.removeOnRobotReadyListener(this);
-            robot.cancelAllTtsRequests();
-        }
-    }
-
-    @Override
-    public void onRobotReady(boolean isReady) {
-        if (!isReady || robot == null) return;
-        try {
-            ActivityInfo info = getPackageManager()
-                    .getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
-            robot.onStart(info);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // ── 용의자 목록 팝업 ──────────────────────────────────────
-    private void showSuspectListDialog() {
-        android.widget.ScrollView scrollView = new android.widget.ScrollView(this);
-        android.widget.LinearLayout list = new android.widget.LinearLayout(this);
-        list.setOrientation(android.widget.LinearLayout.VERTICAL);
-        list.setBackgroundColor(android.graphics.Color.parseColor("#1A1A2E"));
-        list.setPadding(0, 8, 0, 8);
-
-        String[][] suspects = {
-            {"강병철", "집사 · 58세", "주방 설거지", "횡령 사실 발각 위기", "kang_byung_chul"},
-            {"윤재호", "장남 · 42세", "2층 방 취침", "유언장 경영권 박탈", "yoon_jae_ho"},
-            {"윤수아", "장녀 · 38세", "응접실 독서", "해외 사업 자금 거부", "yoon_su_a"},
-            {"박미경", "재혼 배우자 · 45세", "침실 수면", "이혼 요구 갈등", "park_mi_kyung"},
-            {"이준혁", "주치의 · 51세", "22시 귀가", "불법 처방 발각 위기", "lee_jun_hyuk"},
-            {"오달수", "정원사 · 62세", "창고 정리", "저택 매각 시 실직", "oh_dal_su"},
-        };
-
-        for (String[] s : suspects) {
-            android.widget.LinearLayout row = new android.widget.LinearLayout(this);
-            row.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-            row.setPadding(24, 16, 24, 16);
-
-            android.widget.ImageView img = new android.widget.ImageView(this);
-            int resId = getResources().getIdentifier(s[4], "drawable", getPackageName());
-            if (resId != 0) img.setImageResource(resId);
-            img.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
-            int size = (int)(56 * getResources().getDisplayMetrics().density);
-            android.widget.LinearLayout.LayoutParams imgP = new android.widget.LinearLayout.LayoutParams(size, size);
-            imgP.setMargins(0, 0, 24, 0);
-            img.setLayoutParams(imgP);
-            row.addView(img);
-
-            android.widget.LinearLayout text = new android.widget.LinearLayout(this);
-            text.setOrientation(android.widget.LinearLayout.VERTICAL);
-            text.setLayoutParams(new android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-
-            android.widget.TextView tvName = new android.widget.TextView(this);
-            tvName.setText(s[0] + "  " + s[1]);
-            tvName.setTextColor(android.graphics.Color.parseColor("#D4AF37"));
-            tvName.setTextSize(13f);
-            tvName.setTypeface(null, android.graphics.Typeface.BOLD);
-            text.addView(tvName);
-
-            android.widget.TextView tvAlibi = new android.widget.TextView(this);
-            tvAlibi.setText("알리바이: " + s[2]);
-            tvAlibi.setTextColor(android.graphics.Color.parseColor("#AAAAAA"));
-            tvAlibi.setTextSize(11f);
-            text.addView(tvAlibi);
-
-            android.widget.TextView tvMotive = new android.widget.TextView(this);
-            tvMotive.setText("동기: " + s[3]);
-            tvMotive.setTextColor(android.graphics.Color.parseColor("#FF8A8A"));
-            tvMotive.setTextSize(11f);
-            text.addView(tvMotive);
-
-            row.addView(text);
-
-            android.view.View divider = new android.view.View(this);
-            divider.setBackgroundColor(android.graphics.Color.parseColor("#2A2A40"));
-            divider.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1));
-            list.addView(row);
-            list.addView(divider);
-        }
-
-        scrollView.addView(list);
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("\uD83D\uDC65 용의자 목록")
-            .setView(scrollView)
-            .setPositiveButton("닫기", null)
-            .show();
-    }
-
 }
